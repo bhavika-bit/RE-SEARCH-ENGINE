@@ -70,51 +70,27 @@ def append_message(project_id, role, content):
     return messages
 
 def export_project(project_id):
-    """
-    Export metadata + chat history.
-    Does NOT export FAISS vector database.
-    """
     metadata = {}
-
     meta_path = get_metadata_path(project_id)
     if os.path.exists(meta_path):
         with open(meta_path, "r") as f:
             metadata = json.load(f)
-
     export_data = {
         "metadata": metadata,
         "chat_history": load_chat_history(project_id)
     }
-
     return json.dumps(export_data, indent=2)
 
 
 def import_project(uploaded_file):
-    """
-    Import project metadata + chat history.
-    Creates a fresh project ID.
-    """
     data = json.load(uploaded_file)
-
     metadata = data["metadata"]
     chat_history = data.get("chat_history", [])
-
     new_project_id = str(uuid.uuid4())[:8]
-
     metadata["project_id"] = new_project_id
-
     os.makedirs(get_project_path(new_project_id), exist_ok=True)
-
-    save_metadata(
-        new_project_id,
-        metadata
-    )
-
-    save_chat_history(
-        new_project_id,
-        chat_history
-    )
-
+    save_metadata(new_project_id, metadata)
+    save_chat_history(new_project_id, chat_history)
     return new_project_id
 
 
@@ -126,10 +102,8 @@ class RAG:
         self.vectorstore = None
 
     def load_data_from_files(self, uploaded_files, project_id):
-        """Accept Streamlit UploadedFile objects, save to temp, load."""
         self.documents = []
         import tempfile
-
         for uf in uploaded_files:
             ext = os.path.splitext(uf.name)[1].lower()
             with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
@@ -427,14 +401,11 @@ Be detailed and practical.
         return self.llm.invoke(prompt).content
 
     def chat(self, user_message, history):
-        """Chat with context from documents + project info + conversation history."""
         context = self._get_context()
-
         history_text = ""
-        for msg in history[-10:]:   # last 10 messages for context window
+        for msg in history[-10:]:
             role = "User" if msg["role"] == "user" else "Assistant"
             history_text += f"{role}: {msg['content']}\n"
-
         prompt = f"""
 You are an expert research mentor and assistant.
 Project Topic: {self.topic}
@@ -503,131 +474,377 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* ── Dark mode ── */
-    [data-testid="stAppViewContainer"][data-theme="dark"] [data-testid="stSidebar"],
-    .stApp[data-theme="dark"] [data-testid="stSidebar"] {
-        background: #0f1117;
-    }
-    [data-testid="stAppViewContainer"][data-theme="dark"] .project-card,
-    .stApp[data-theme="dark"] .project-card {
-        background: #1e2130;
-        border-left: 3px solid #4f8ef7;
-        color: #ffffff;
-    }
-    [data-testid="stAppViewContainer"][data-theme="dark"] .project-card:hover,
-    .stApp[data-theme="dark"] .project-card:hover {
-        background: #252a40;
-    }
+/* ─── GOOGLE FONT ─── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
 
-    /* ── Light mode — pastel palette ── */
-    [data-testid="stAppViewContainer"][data-theme="light"] [data-testid="stSidebar"],
-    .stApp[data-theme="light"] [data-testid="stSidebar"] {
-        background: #f0f4ff;
-    }
-    [data-testid="stAppViewContainer"][data-theme="light"] .project-card,
-    .stApp[data-theme="light"] .project-card {
-        background: #e8eeff;
-        border-left: 3px solid #7ba7f7;
-        color: #2c3e6b;
-    }
-    [data-testid="stAppViewContainer"][data-theme="light"] .project-card:hover,
-    .stApp[data-theme="light"] .project-card:hover {
-        background: #dce6ff;
-    }
+/* ─── ROOT TOKENS ─── */
+:root {
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --transition: 0.18s ease;
+}
 
-    /* Fallback: applies when theme attribute is absent (default dark-style) */
-    [data-testid="stSidebar"] {
-        background: #0f1117;
-    }
-    .project-card {
-        background: #1e2130;
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        border-left: 3px solid #4f8ef7;
-    }
-    .project-card:hover { background: #252a40; }
+/* ════════════════════════════
+   LIGHT MODE  (pastel palette)
+   ════════════════════════════ */
+[data-theme="light"],
+.stApp[data-theme="light"] {
+    --bg-app:        #f5f3ff;
+    --bg-sidebar:    #ede9fe;
+    --bg-card:       #ffffff;
+    --bg-card-hover: #f3f0ff;
+    --bg-info:       #ffffff;
+    --bg-chat:       #faf9ff;
+    --border:        #ddd6fe;
+    --accent:        #7c3aed;
+    --accent-soft:   #ede9fe;
+    --text-primary:  #1e1b4b;
+    --text-secondary:#5b5488;
+    --text-muted:    #8b7fc7;
 
-    /* ── Light mode overrides for main content ── */
-    @media (prefers-color-scheme: light) {
-        [data-testid="stSidebar"] {
-            background: #f0f4ff !important;
-        }
-        .project-card {
-            background: #e8eeff !important;
-            border-left: 3px solid #7ba7f7 !important;
-            color: #2c3e6b !important;
-        }
-        .project-card:hover {
-            background: #dce6ff !important;
-        }
-    }
+    /* quick-action button palette — pastels */
+    --qa1-bg:#fce7f3; --qa1-fg:#831843;
+    --qa2-bg:#fef3c7; --qa2-fg:#78350f;
+    --qa3-bg:#d1fae5; --qa3-fg:#064e3b;
+    --qa4-bg:#dbeafe; --qa4-fg:#1e3a5f;
+    --qa5-bg:#ede9fe; --qa5-fg:#3b0764;
+    --qa6-bg:#cffafe; --qa6-fg:#0c4a6e;
+    --qa7-bg:#fef9c3; --qa7-fg:#713f12;
+    --qa8-bg:#fce7f3; --qa8-fg:#500724;
+}
 
-    .stChatMessage { border-radius: 10px; }
+/* ════════════════════════════
+   DARK MODE  (vibrant palette)
+   ════════════════════════════ */
+[data-theme="dark"],
+.stApp[data-theme="dark"] {
+    --bg-app:        #0d0f17;
+    --bg-sidebar:    #11131e;
+    --bg-card:       #181b29;
+    --bg-card-hover: #1f2235;
+    --bg-info:       #181b29;
+    --bg-chat:       #13151f;
+    --border:        #2a2d45;
+    --accent:        #818cf8;
+    --accent-soft:   #1e2040;
+    --text-primary:  #e8e6ff;
+    --text-secondary:#9d99cc;
+    --text-muted:    #5c5888;
 
-    /* ══ STUDIO — style the sub-column buttons inside right_col ══
-       We target [data-testid="column"]:last-child which is right_col,
-       then the nested columns inside it via .studio-col class on their wrapper.
-       Easiest: give each button a unique key like studio-btn-N and target by key attr. */
+    /* quick-action button palette — vibrant */
+    --qa1-bg:#ff1a6b; --qa1-fg:#ffffff;
+    --qa2-bg:#ff6d00; --qa2-fg:#ffffff;
+    --qa3-bg:#00c853; --qa3-fg:#001a09;
+    --qa4-bg:#2979ff; --qa4-fg:#ffffff;
+    --qa5-bg:#9c27b0; --qa5-fg:#ffffff;
+    --qa6-bg:#00bcd4; --qa6-fg:#001a1f;
+    --qa7-bg:#ffd600; --qa7-fg:#1a1400;
+    --qa8-bg:#e91e63; --qa8-fg:#ffffff;
+}
 
-    /* Base style for ALL studio buttons */
-    [data-testid="stBaseButton-secondary"] {
-        border-radius: 16px !important;
-        min-height: 90px !important;
-        font-size: 0.80rem !important;
-        font-weight: 700 !important;
-        border: none !important;
-        white-space: pre-wrap !important;
-        line-height: 1.3 !important;
-        transition: transform 0.15s ease, filter 0.15s ease !important;
-    }
-    [data-testid="stBaseButton-secondary"]:hover {
-        transform: translateY(-3px) !important;
-        filter: brightness(1.1) !important;
-    }
+/* ─── SIDEBAR ─── */
+[data-testid="stSidebar"] {
+    background: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border) !important;
+    padding-top: 0 !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.5rem;
+}
 
-    /* Target each studio button by its key — dark vibrant defaults */
-    [data-testid="stBaseButton-secondary"][kind="secondary"]#qa_roadmap_btn button,
-    button[kind="secondary"][data-testid*="qa_roadmap"] { background:#ff2d6b !important; color:#fff !important; }
+/* sidebar logo/title */
+.sidebar-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 1rem 0;
+    letter-spacing: -0.01em;
+}
 
-    /* Simpler: target by position inside the studio wrapper div */
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ff2d6b !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ff7a00 !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#00c853 !important; color:#001a09 !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#2979ff !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#aa00ff !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#00b8d4 !important; color:#001a1f !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#ffd600 !important; color:#221c00 !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
-    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#f50057 !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+/* section labels in sidebar */
+.sidebar-section-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 1.2rem 0 0.5rem 0;
+}
 
-    /* light mode pastels */
-    @media (prefers-color-scheme: light) {
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ffd6e0 !important; color:#7a2240 !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ffe5cc !important; color:#7a3d10 !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#d4f0c8 !important; color:#255c18 !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#cde8ff !important; color:#0d3d6b !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#ead5fb !important; color:#4a1d80 !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#c8f0ee !important; color:#0d4f4c !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#fff3c4 !important; color:#6b4d00 !important; }
-        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#ffd6f5 !important; color:#6b0d55 !important; }
-    }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ffd6e0 !important; color:#7a2240 !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ffe5cc !important; color:#7a3d10 !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#d4f0c8 !important; color:#255c18 !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#cde8ff !important; color:#0d3d6b !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#ead5fb !important; color:#4a1d80 !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#c8f0ee !important; color:#0d4f4c !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#fff3c4 !important; color:#6b4d00 !important; }
-    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button,
-    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#ffd6f5 !important; color:#6b0d55 !important; }
+/* project list items */
+.proj-item {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+    transition: all var(--transition);
+    background: transparent;
+}
+.proj-item:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+.proj-item.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+/* ─── NEW PROJECT BUTTON ─── */
+[data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.01em !important;
+    padding: 0.5rem 1rem !important;
+    transition: opacity var(--transition) !important;
+}
+[data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button:hover {
+    opacity: 0.88 !important;
+}
+
+/* sidebar project buttons */
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.875rem !important;
+    text-align: left !important;
+    padding: 9px 12px !important;
+    transition: all var(--transition) !important;
+    font-weight: 400 !important;
+}
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button:hover {
+    background: var(--bg-card-hover) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* ─── MAIN AREA ─── */
+.stApp {
+    background: var(--bg-app) !important;
+    font-family: 'DM Sans', sans-serif;
+}
+.block-container {
+    padding: 1.5rem 2rem 4rem 2rem !important;
+    max-width: 100% !important;
+}
+
+/* ─── PROJECT BANNER (top of center) ─── */
+.project-banner {
+    background: var(--bg-info);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+}
+.project-banner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+}
+.info-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.info-pill {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.info-pill span.pill-label {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.72rem;
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-header {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem 0;
+}
+
+/* ─── CHAT AREA ─── */
+.chat-container {
+    background: var(--bg-chat);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    min-height: 300px;
+}
+[data-testid="stChatMessage"] {
+    background: var(--bg-card) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--border) !important;
+    margin-bottom: 0.5rem !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+/* chat input */
+[data-testid="stChatInputContainer"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-card) !important;
+}
+
+/* ─── QUICK ACTIONS PANEL ─── */
+.qa-header {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem 0;
+}
+.qa-panel {
+    background: var(--bg-info);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+}
+
+/* quick-action buttons base */
+div[class*="qa-panel"] [data-testid="stBaseButton-secondary"] button,
+.qa-panel ~ div [data-testid="stBaseButton-secondary"] button {
+    border-radius: var(--radius-md) !important;
+    min-height: 72px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+    white-space: pre-wrap !important;
+    line-height: 1.4 !important;
+    transition: transform var(--transition), filter var(--transition) !important;
+}
+
+/* individual QA button colors via nth-child on the studio wrapper */
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button { background: var(--qa1-bg) !important; color: var(--qa1-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button { background: var(--qa2-bg) !important; color: var(--qa2-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button { background: var(--qa3-bg) !important; color: var(--qa3-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button { background: var(--qa4-bg) !important; color: var(--qa4-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button { background: var(--qa5-bg) !important; color: var(--qa5-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button { background: var(--qa6-bg) !important; color: var(--qa6-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button { background: var(--qa7-bg) !important; color: var(--qa7-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button { background: var(--qa8-bg) !important; color: var(--qa8-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div button:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.08) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+}
+
+/* ─── METRICS ─── */
+[data-testid="stMetric"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 10px 14px !important;
+}
+[data-testid="stMetricLabel"] {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+}
+[data-testid="stMetricValue"] {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+}
+
+/* ─── DIVIDER ─── */
+hr {
+    border-color: var(--border) !important;
+    margin: 0.75rem 0 !important;
+}
+
+/* ─── PAGE TITLE (h1) for forms ─── */
+h1 {
+    font-family: 'DM Serif Display', serif !important;
+    font-weight: 400 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* ─── DOWNLOAD BUTTON ─── */
+[data-testid="stDownloadButton"] button {
+    background: var(--accent-soft) !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    transition: background var(--transition) !important;
+}
+[data-testid="stDownloadButton"] button:hover {
+    background: var(--accent) !important;
+    color: #fff !important;
+}
+
+/* ─── CHAT HISTORY SCROLL ─── */
+.chat-scroll {
+    max-height: 58vh;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* ─── FORM INPUTS ─── */
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {
+    font-family: 'DM Sans', sans-serif !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--border) !important;
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+/* remove default streamlit padding on columns */
+[data-testid="column"] {
+    padding: 0 0.4rem !important;
+}
+[data-testid="column"]:first-child { padding-left: 0 !important; }
+[data-testid="column"]:last-child  { padding-right: 0 !important; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -667,22 +884,17 @@ if "triggered_feature" not in st.session_state:
 
 
 def load_project(project_id):
-    """Load an existing project into session state."""
     meta_path = get_metadata_path(project_id)
     if not os.path.exists(meta_path):
         st.error("Project not found.")
         return
-
     with open(meta_path) as f:
         meta = json.load(f)
-
     faiss_path = get_faiss_path(project_id)
-
     if os.path.exists(faiss_path):
         rag = load_cached_faiss(project_id)
     else:
-        rag = None  # project was created without documents
-
+        rag = None
     llm = get_llm()
     agent = ResearchAnalyst(rag_instance=rag, llm_instance=llm)
     agent.set_project(
@@ -690,73 +902,74 @@ def load_project(project_id):
         problem_statement=meta["problem_statement"],
         timeline=meta["timeline"]
     )
-
     st.session_state.active_project_id = project_id
     st.session_state.agent = agent
     st.session_state.graph = Graph(agent)
     st.session_state.active_meta = meta
 
 
-# ── Feature definitions ── (label, key, css-class, icon, short-name)
+# ── Feature definitions ──
 FEATURES = [
-    ("📅 Roadmap",       "roadmap",      "sc-roadmap",      "📅", "Roadmap"),
-    ("🔍 Research Gap",  "gap",          "sc-gap",          "🔍", "Research Gap"),
-    ("📚 Learning Path", "learning",     "sc-learning",     "📚", "Learning Path"),
-    ("🧠 Methodology",   "methodology",  "sc-methodology",  "🧠", "Methodology"),
-    ("📄 Paper Intel",   "paper",        "sc-paper",        "📄", "Paper Intel"),
-    ("🌐 Discovery",     "discovery",    "sc-discovery",    "🌐", "Discovery"),
-    ("🎓 Mentor",        "mentor",       "sc-mentor",       "🎓", "Mentor"),
-    ("❓ Quiz",          "quiz",         "sc-quiz",         "❓", "Quiz"),
+    ("📅 Roadmap",       "roadmap",      "Roadmap"),
+    ("🔍 Research Gap",  "gap",          "Research Gap"),
+    ("📚 Learning Path", "learning",     "Learning Path"),
+    ("🧠 Methodology",   "methodology",  "Methodology"),
+    ("📄 Paper Intel",   "paper",        "Paper Intel"),
+    ("🌐 Discovery",     "discovery",    "Discovery"),
+    ("🎓 Mentor",        "mentor",       "Mentor"),
+    ("❓ Quiz",          "quiz",         "Quiz"),
 ]
 
 
+# ════════════════════════════════════════════
+# SIDEBAR
+# ════════════════════════════════════════════
 with st.sidebar:
-    st.markdown("## 🔬 ResearchEngine")
+    st.markdown('<div class="sidebar-brand">🔬 ResearchEngine</div>', unsafe_allow_html=True)
     st.markdown("---")
 
     if st.button("＋ New Project", use_container_width=True, type="primary"):
         st.session_state.show_new_project_form = True
         st.session_state.active_project_id = None
 
-    st.markdown("### My Projects")
-
+    # ── Project list ──
+    st.markdown('<div class="sidebar-section-label">My Projects</div>', unsafe_allow_html=True)
     all_projects = load_all_projects()
-
     if not all_projects:
-        st.caption("No projects yet. Create one above.")
+        st.caption("No projects yet.")
     else:
         for proj in all_projects:
             pid = proj["project_id"]
             label = proj["project_name"]
             is_active = (pid == st.session_state.active_project_id)
-            btn_label = f"{'▶ ' if is_active else ''}{label}"
+            btn_label = f"{'▶  ' if is_active else ''}{label}"
             if st.button(btn_label, key=f"proj_{pid}", use_container_width=True):
                 st.session_state.show_new_project_form = False
                 load_project(pid)
                 st.rerun()
 
-    uploaded_project_file = st.file_uploader(
-        "📥 Import Project",
-        type=["json"]
-    )
-
+    # ── Import ──
+    st.markdown("---")
+    st.markdown('<div class="sidebar-section-label">Import / Export</div>', unsafe_allow_html=True)
+    uploaded_project_file = st.file_uploader("Import project (.json)", type=["json"], label_visibility="collapsed")
     if uploaded_project_file is not None:
         try:
             imported_project_id = import_project(uploaded_project_file)
-            st.success("Project imported successfully!")
+            st.success("Project imported!")
             load_project(imported_project_id)
             st.rerun()
         except Exception as e:
             st.error(f"Import failed: {str(e)}")
 
 
-# ── Handle triggered feature (runs in main area, keeps sidebar clean) ──
+# ════════════════════════════════════════════
+# TRIGGERED FEATURE HANDLER
+# ════════════════════════════════════════════
 if st.session_state.triggered_feature and st.session_state.active_project_id and st.session_state.agent:
     key   = st.session_state.triggered_feature
     pid   = st.session_state.active_project_id
     graph = st.session_state.graph
-
-    feature_label = next((k for lbl, k, *_ in FEATURES if k == key), key).replace("_", " ").title()
+    feature_label = next((lbl for lbl, k, *_ in FEATURES if k == key), key)
 
     with st.spinner(f"Generating {feature_label}..."):
         state = {}
@@ -784,7 +997,9 @@ if st.session_state.triggered_feature and st.session_state.active_project_id and
     st.rerun()
 
 
+# ════════════════════════════════════════════
 # NEW PROJECT FORM
+# ════════════════════════════════════════════
 if st.session_state.show_new_project_form:
     st.title("Create New Project")
 
@@ -806,8 +1021,6 @@ if st.session_state.show_new_project_form:
         else:
             project_id = str(uuid.uuid4())[:8]
             os.makedirs(get_project_path(project_id), exist_ok=True)
-
-            # Process documents if any
             rag = None
             if uploaded_files:
                 with st.spinner("Processing documents..."):
@@ -818,8 +1031,6 @@ if st.session_state.show_new_project_form:
                     rag.build_vectordb()
                     rag.save_vectordb(project_id)
                 st.success(f"Loaded {len(rag.documents)} document pages.")
-
-            # Save metadata
             metadata = {
                 "project_id": project_id,
                 "project_name": project_name,
@@ -829,50 +1040,62 @@ if st.session_state.show_new_project_form:
                 "has_docs": rag is not None
             }
             save_metadata(project_id, metadata)
-
-            # Load into session
             llm = get_llm()
             agent = ResearchAnalyst(rag_instance=rag, llm_instance=llm)
             agent.set_project(topic=topic, problem_statement=problem_stmt, timeline=timeline)
-
             st.session_state.active_project_id = project_id
             st.session_state.agent = agent
             st.session_state.graph = Graph(agent)
             st.session_state.active_meta = metadata
             st.session_state.show_new_project_form = False
-
-            # Auto project summary as first message
             with st.spinner("Generating project summary..."):
                 summary = agent.projectsummary()
             append_message(project_id, "assistant", f"**Project Summary**\n\n{summary}")
-
             st.success("Project created!")
             st.rerun()
 
 
+# ════════════════════════════════════════════
 # ACTIVE PROJECT VIEW
+# ════════════════════════════════════════════
 elif st.session_state.active_project_id and st.session_state.agent:
     pid   = st.session_state.active_project_id
     meta  = st.session_state.active_meta
     agent = st.session_state.agent
     graph = st.session_state.graph
 
-    st.title(f"🔬 {meta['project_name']}")
+    # ── 3-column layout: center is dominant ──
+    left_col, mid_col, right_col = st.columns([1, 2.8, 1.1])
 
-    # ── 3-COLUMN LAYOUT ──
-    left_col, mid_col, right_col = st.columns([1, 2.5, 1])
-
-    # ════════════════════════════════
-    # LEFT COLUMN — project info & export
-    # ════════════════════════════════
+    # ════════════════════════════
+    # LEFT — project info + export
+    # ════════════════════════════
     with left_col:
-        st.markdown("#### 📋 Project Info")
-        st.metric("Topic", meta["topic"][:30] + ("..." if len(meta["topic"]) > 30 else ""))
-        st.metric("Timeline", meta["timeline"])
-        st.metric("Docs", "Yes ✅" if meta.get("has_docs") else "No 📄")
+        # Project title card
+        st.markdown(
+            f"""
+            <div class="project-banner">
+                <h2>🔬 {meta['project_name']}</h2>
+                <div class="info-pills">
+                    <div class="info-pill">
+                        <span class="pill-label">Topic</span>
+                        {meta['topic'][:28] + ('…' if len(meta['topic']) > 28 else '')}
+                    </div>
+                    <div class="info-pill">
+                        <span class="pill-label">Timeline</span>
+                        {meta['timeline']}
+                    </div>
+                    <div class="info-pill">
+                        {'✅ Docs' if meta.get('has_docs') else '📄 No docs'}
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-        st.markdown("---")
-        st.markdown("#### 📦 Backup")
+        # Export
+        st.markdown('<div class="sidebar-section-label" style="margin-top:1rem;">Backup</div>', unsafe_allow_html=True)
         export_data = export_project(pid)
         st.download_button(
             label="📤 Export Project",
@@ -882,100 +1105,88 @@ elif st.session_state.active_project_id and st.session_state.agent:
             use_container_width=True
         )
 
-    # ════════════════════════════════
-    # MIDDLE COLUMN — chat
-    # ════════════════════════════════
+        # Chat history summary (last few turns)
+        messages_all = load_chat_history(pid)
+        if messages_all:
+            st.markdown('<div class="sidebar-section-label" style="margin-top:1rem;">Recent</div>', unsafe_allow_html=True)
+            for msg in messages_all[-4:]:
+                icon = "🧑" if msg["role"] == "user" else "🤖"
+                snippet = msg["content"][:60].replace("\n", " ") + ("…" if len(msg["content"]) > 60 else "")
+                st.markdown(
+                    f'<div style="font-size:0.76rem;color:var(--text-muted);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.4;">'
+                    f'{icon} {snippet}</div>',
+                    unsafe_allow_html=True
+                )
+
+    # ════════════════════════════
+    # CENTER — chat
+    # ════════════════════════════
     with mid_col:
-        st.markdown("### 💬 Research Chat")
+        st.markdown('<div class="section-header">Research Chat</div>', unsafe_allow_html=True)
 
         messages = load_chat_history(pid)
         for msg in messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-    # ════════════════════════════════
-    # RIGHT COLUMN — Studio / Quick Actions (2×4 grid)
-    # ════════════════════════════════
+    # ════════════════════════════
+    # RIGHT — quick actions (no "Studio" branding)
+    # ════════════════════════════
     with right_col:
-        st.markdown("#### ⚡ Studio")
-        st.markdown('<div class="studio-wrapper">', unsafe_allow_html=True)
+        st.markdown('<div class="qa-header">Quick Actions</div>', unsafe_allow_html=True)
+        st.markdown('<div class="studio-wrap">', unsafe_allow_html=True)
 
-        # Define colors inline per button using unique keys styled via CSS
         STUDIO = [
-            ("📅\nRoadmap",       "roadmap",      "#ff2d6b", "#fff"),
-            ("🔍\nResearch Gap",  "gap",           "#ff7a00", "#fff"),
-            ("📚\nLearning Path", "learning",      "#00c853", "#001a09"),
-            ("🧠\nMethodology",   "methodology",   "#2979ff", "#fff"),
-            ("📄\nPaper Intel",   "paper",         "#aa00ff", "#fff"),
-            ("🌐\nDiscovery",     "discovery",     "#00b8d4", "#001a1f"),
-            ("🎓\nMentor",        "mentor",        "#ffd600", "#221c00"),
-            ("❓\nQuiz",          "quiz",          "#f50057", "#fff"),
+            ("📅\nRoadmap",       "roadmap"),
+            ("🔍\nResearch Gap",  "gap"),
+            ("📚\nLearning",      "learning"),
+            ("🧠\nMethodology",   "methodology"),
+            ("📄\nPaper Intel",   "paper"),
+            ("🌐\nDiscovery",     "discovery"),
+            ("🎓\nMentor",        "mentor"),
+            ("❓\nQuiz",          "quiz"),
         ]
 
-        # Render pairs as 2-column rows
         for i in range(0, len(STUDIO), 2):
             c1, c2 = st.columns(2)
-            for col, (label, key, bg, fg) in zip([c1, c2], STUDIO[i:i+2]):
+            for col, (label, key) in zip([c1, c2], STUDIO[i:i+2]):
                 with col:
-                    st.markdown(
-                        f"""<style>
-                        div[data-testid="stButton"]:has(button[kind="secondary"][data-testid="qa_{key}"]) button,
-                        button[data-testid="qa_{key}"] {{
-                            background: {bg} !important;
-                            color: {fg} !important;
-                            border: none !important;
-                            border-radius: 16px !important;
-                            min-height: 88px !important;
-                            font-size: 0.82rem !important;
-                            font-weight: 700 !important;
-                            white-space: pre-wrap !important;
-                            line-height: 1.35 !important;
-                            width: 100% !important;
-                        }}
-                        button[data-testid="qa_{key}"]:hover {{
-                            filter: brightness(1.12) !important;
-                            transform: translateY(-2px) !important;
-                        }}
-                        </style>""",
-                        unsafe_allow_html=True
-                    )
                     if st.button(label, key=f"qa_{key}", use_container_width=True):
                         st.session_state.triggered_feature = key
                         st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── CHAT INPUT (page-level — Streamlit requires this outside columns) ──
+    # ── CHAT INPUT ──
     prompt = st.chat_input("Ask your research mentor anything...")
-
     if prompt:
         with mid_col:
             with st.chat_message("user"):
                 st.markdown(prompt)
-
         messages = append_message(pid, "user", prompt)
-
         with mid_col:
             with st.chat_message("assistant"):
                 with st.spinner("Thinking..."):
                     response = agent.chat(prompt, messages)
                 st.markdown(response)
-
         append_message(pid, "assistant", response)
         st.rerun()
 
 
-# ── LANDING / EMPTY STATE ──
+# ════════════════════════════════════════════
+# LANDING / EMPTY STATE
+# ════════════════════════════════════════════
 else:
     st.markdown("""
-    <div style="text-align:center; padding: 80px 40px;">
-        <h1>🔬 ResearchEngine</h1>
-        <p style="font-size:1.2rem; color:#888;">
-            Your AI-powered research mentor. Create a project to get started.
+    <div style="text-align:center; padding: 100px 40px;">
+        <p style="font-family:'DM Serif Display',serif; font-size:2.5rem; font-weight:400; color:var(--text-primary); margin:0 0 0.5rem 0; letter-spacing:-0.02em;">
+            🔬 ResearchEngine
         </p>
-        <br>
-        <p style="color:#555;">
-            ← Click <strong>＋ New Project</strong> in the sidebar
+        <p style="font-family:'DM Sans',sans-serif; font-size:1.05rem; color:var(--text-muted); margin:0 0 2rem 0;">
+            Your AI-powered research mentor.
+        </p>
+        <p style="font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--text-secondary);">
+            ← Click <strong>＋ New Project</strong> in the sidebar to get started.
         </p>
     </div>
     """, unsafe_allow_html=True)
