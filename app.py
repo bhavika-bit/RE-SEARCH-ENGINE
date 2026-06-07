@@ -585,66 +585,68 @@ st.markdown("""
         filter: brightness(1.08);
         transform: translateX(2px);
     }
-    .quick-action-btn:active {
-        transform: translateX(0px) scale(0.98);
-    }
  
-    /* ── LIGHT MODE pastel colours ── */
-    [data-theme="light"] .qa-roadmap,
-    .stApp[data-theme="light"] .qa-roadmap   { background: #ffd6e0; color: #7a2240; }
-    [data-theme="light"] .qa-gap,
-    .stApp[data-theme="light"] .qa-gap       { background: #fde2c8; color: #7a3d10; }
-    [data-theme="light"] .qa-learning,
-    .stApp[data-theme="light"] .qa-learning  { background: #d4f0c8; color: #255c18; }
-    [data-theme="light"] .qa-methodology,
-    .stApp[data-theme="light"] .qa-methodology { background: #cde8ff; color: #0d3d6b; }
-    [data-theme="light"] .qa-paper,
-    .stApp[data-theme="light"] .qa-paper     { background: #e8d5fb; color: #4a1d80; }
-    [data-theme="light"] .qa-discovery,
-    .stApp[data-theme="light"] .qa-discovery { background: #c8f0ee; color: #0d4f4c; }
-    [data-theme="light"] .qa-mentor,
-    .stApp[data-theme="light"] .qa-mentor    { background: #fff3c4; color: #6b4d00; }
-    [data-theme="light"] .qa-quiz,
-    .stApp[data-theme="light"] .qa-quiz      { background: #ffd6f5; color: #6b0d55; }
+    /* ── LIGHT MODE pastel — target the right column's stButton elements ── */
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(1) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(1) button
+        { background: #ffd6e0 !important; color: #7a2240 !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(2) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(2) button
+        { background: #fde2c8 !important; color: #7a3d10 !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(3) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(3) button
+        { background: #d4f0c8 !important; color: #255c18 !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(4) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(4) button
+        { background: #cde8ff !important; color: #0d3d6b !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(5) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(5) button
+        { background: #e8d5fb !important; color: #4a1d80 !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(6) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(6) button
+        { background: #c8f0ee !important; color: #0d4f4c !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(7) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(7) button
+        { background: #fff3c4 !important; color: #6b4d00 !important; border: none !important; }
+    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(8) button,
+    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(8) button
+        { background: #ffd6f5 !important; color: #6b0d55 !important; border: none !important; }
  
-    /* ── DARK MODE vibrant colours ── */
-    [data-theme="dark"] .qa-roadmap,
-    .stApp[data-theme="dark"] .qa-roadmap    { background: #ff2d6b; color: #ffffff; }
-    [data-theme="dark"] .qa-gap,
-    .stApp[data-theme="dark"] .qa-gap        { background: #ff7a00; color: #ffffff; }
-    [data-theme="dark"] .qa-learning,
-    .stApp[data-theme="dark"] .qa-learning   { background: #00e676; color: #002b15; }
-    [data-theme="dark"] .qa-methodology,
-    .stApp[data-theme="dark"] .qa-methodology { background: #2979ff; color: #ffffff; }
-    [data-theme="dark"] .qa-paper,
-    .stApp[data-theme="dark"] .qa-paper      { background: #d500f9; color: #ffffff; }
-    [data-theme="dark"] .qa-discovery,
-    .stApp[data-theme="dark"] .qa-discovery  { background: #00e5ff; color: #002b30; }
-    [data-theme="dark"] .qa-mentor,
-    .stApp[data-theme="dark"] .qa-mentor     { background: #ffea00; color: #2b2500; }
-    [data-theme="dark"] .qa-quiz,
-    .stApp[data-theme="dark"] .qa-quiz       { background: #ff4081; color: #ffffff; }
+    /* ── DARK MODE vibrant — same right column targeting ── */
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(1) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(1) button
+        { background: #ff2d6b !important; color: #fff !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(2) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(2) button
+        { background: #ff7a00 !important; color: #fff !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(3) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(3) button
+        { background: #00e676 !important; color: #002b15 !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(4) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(4) button
+        { background: #2979ff !important; color: #fff !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(5) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(5) button
+        { background: #d500f9 !important; color: #fff !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(6) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(6) button
+        { background: #00e5ff !important; color: #002b30 !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(7) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(7) button
+        { background: #ffea00 !important; color: #2b2500 !important; border: none !important; }
+    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(8) button,
+    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(8) button
+        { background: #ff4081 !important; color: #fff !important; border: none !important; }
  
-    /* Fallback (no data-theme attr, assume dark) */
-    .qa-roadmap    { background: #ff2d6b; color: #ffffff; }
-    .qa-gap        { background: #ff7a00; color: #ffffff; }
-    .qa-learning   { background: #00e676; color: #002b15; }
-    .qa-methodology { background: #2979ff; color: #ffffff; }
-    .qa-paper      { background: #d500f9; color: #ffffff; }
-    .qa-discovery  { background: #00e5ff; color: #002b30; }
-    .qa-mentor     { background: #ffea00; color: #2b2500; }
-    .qa-quiz       { background: #ff4081; color: #ffffff; }
- 
-    @media (prefers-color-scheme: light) {
-        .qa-roadmap    { background: #ffd6e0 !important; color: #7a2240 !important; }
-        .qa-gap        { background: #fde2c8 !important; color: #7a3d10 !important; }
-        .qa-learning   { background: #d4f0c8 !important; color: #255c18 !important; }
-        .qa-methodology { background: #cde8ff !important; color: #0d3d6b !important; }
-        .qa-paper      { background: #e8d5fb !important; color: #4a1d80 !important; }
-        .qa-discovery  { background: #c8f0ee !important; color: #0d4f4c !important; }
-        .qa-mentor     { background: #fff3c4 !important; color: #6b4d00 !important; }
-        .qa-quiz       { background: #ffd6f5 !important; color: #6b0d55 !important; }
-    }
+    /* Fallback dark (no data-theme attr) */
+    [data-testid="column"]:last-child .stButton:nth-child(1) button { background: #ff2d6b !important; color: #fff !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(2) button { background: #ff7a00 !important; color: #fff !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(3) button { background: #00e676 !important; color: #002b15 !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(4) button { background: #2979ff !important; color: #fff !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(5) button { background: #d500f9 !important; color: #fff !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(6) button { background: #00e5ff !important; color: #002b30 !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(7) button { background: #ffea00 !important; color: #2b2500 !important; border: none !important; }
+    [data-testid="column"]:last-child .stButton:nth-child(8) button { background: #ff4081 !important; color: #fff !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
  
@@ -749,21 +751,6 @@ with st.sidebar:
             if st.button(btn_label, key=f"proj_{pid}", use_container_width=True):
                 st.session_state.show_new_project_form = False
                 load_project(pid)
-                st.rerun()
- 
-    # ── Quick Actions in sidebar (only when a project is active) ──
-    if st.session_state.active_project_id and st.session_state.agent:
-        st.markdown("---")
-        st.markdown("### ⚡ Quick Actions")
- 
-        for label, key, css_class in FEATURES:
-            # Render a styled HTML button via markdown, then a hidden Streamlit button for logic
-            st.markdown(
-                f'<div class="quick-action-btn {css_class}">{label}</div>',
-                unsafe_allow_html=True
-            )
-            if st.button(label, key=f"qa_{key}", use_container_width=True):
-                st.session_state.triggered_feature = key
                 st.rerun()
  
     uploaded_project_file = st.file_uploader(
@@ -886,55 +873,70 @@ elif st.session_state.active_project_id and st.session_state.agent:
     pid   = st.session_state.active_project_id
     meta  = st.session_state.active_meta
     agent = st.session_state.agent
+    graph = st.session_state.graph
  
     st.title(f"🔬 {meta['project_name']}")
  
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Topic", meta["topic"][:40] + ("..." if len(meta["topic"]) > 40 else ""))
-    col2.metric("Timeline", meta["timeline"])
-    col3.metric("Docs", "Yes ✅" if meta.get("has_docs") else "No 📄")
+    # ── 3-COLUMN LAYOUT ──
+    left_col, mid_col, right_col = st.columns([1, 2.5, 1])
  
-    st.markdown("---")
-    st.markdown("### 📦 Project Backup")
+    # ════════════════════════════════
+    # LEFT COLUMN — project info & export
+    # ════════════════════════════════
+    with left_col:
+        st.markdown("#### 📋 Project Info")
+        st.metric("Topic", meta["topic"][:30] + ("..." if len(meta["topic"]) > 30 else ""))
+        st.metric("Timeline", meta["timeline"])
+        st.metric("Docs", "Yes ✅" if meta.get("has_docs") else "No 📄")
  
-    export_data = export_project(pid)
+        st.markdown("---")
+        st.markdown("#### 📦 Backup")
+        export_data = export_project(pid)
+        st.download_button(
+            label="📤 Export Project",
+            data=export_data,
+            file_name=f"{meta['project_name']}.json",
+            mime="application/json",
+            use_container_width=True
+        )
  
-    st.download_button(
-        label="📤 Export Project",
-        data=export_data,
-        file_name=f"{meta['project_name']}.json",
-        mime="application/json",
-        use_container_width=True
-    )
+    # ════════════════════════════════
+    # MIDDLE COLUMN — chat
+    # ════════════════════════════════
+    with mid_col:
+        st.markdown("### 💬 Research Chat")
  
-    st.markdown("---")
+        messages = load_chat_history(pid)
+        for msg in messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
  
-    st.markdown("### 💬 Research Chat")
+    # ════════════════════════════════
+    # RIGHT COLUMN — quick actions
+    # ════════════════════════════════
+    with right_col:
+        st.markdown("#### ⚡ Quick Actions")
+        for label, key, css_class in FEATURES:
+            if st.button(label, key=f"qa_{key}", use_container_width=True):
+                st.session_state.triggered_feature = key
+                st.rerun()
  
-    # ── DISPLAY CHAT HISTORY ──
-    messages = load_chat_history(pid)
-    for msg in messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
- 
-    # ── CHAT INPUT ──
+    # ── CHAT INPUT (page-level — Streamlit requires this outside columns) ──
     prompt = st.chat_input("Ask your research mentor anything...")
  
     if prompt:
-        # Show user message immediately
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        with mid_col:
+            with st.chat_message("user"):
+                st.markdown(prompt)
  
-        # Save user message
         messages = append_message(pid, "user", prompt)
  
-        # Generate response
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = agent.chat(prompt, messages)
-            st.markdown(response)
+        with mid_col:
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    response = agent.chat(prompt, messages)
+                st.markdown(response)
  
-        # Save assistant response
         append_message(pid, "assistant", response)
         st.rerun()
  
