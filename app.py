@@ -279,7 +279,6 @@ Make questions challenging but fair. Ensure answer is the index (0-3) of the cor
 """
         response = self.llm.invoke(prompt).content
         try:
-            # Extract JSON from response
             start = response.find('{')
             end = response.rfind('}') + 1
             if start != -1 and end != 0:
@@ -287,7 +286,6 @@ Make questions challenging but fair. Ensure answer is the index (0-3) of the cor
                 return json.loads(json_str)
         except:
             pass
-        # Fallback
         return {"questions": []}
 
     def flashcards_json(self):
@@ -532,8 +530,71 @@ def load_cached_faiss(project_id):
 def get_embeddings():
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# ==================== THEME CSS ====================
-def apply_theme():
+# ==================== STICKY PANEL CSS ====================
+def apply_sticky_css():
+    st.markdown("""
+    <style>
+        /* Make columns container use flex with proper alignment */
+        .stColumn {
+            position: relative;
+        }
+        
+        /* Left panel sticky wrapper */
+        [data-testid="column"]:nth-of-type(1) {
+            position: sticky;
+            top: 0px;
+            height: 100vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* Right panel sticky wrapper */
+        [data-testid="column"]:nth-of-type(3) {
+            position: sticky;
+            top: 0px;
+            height: 100vh;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+        
+        /* Center panel - normal scrolling */
+        [data-testid="column"]:nth-of-type(2) {
+            overflow-y: visible;
+            height: auto;
+        }
+        
+        /* Custom scrollbar for sticky panels */
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 3px;
+        }
+        
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
+            background: #00FFFF;
+            border-radius: 3px;
+        }
+        
+        /* Ensure chat container doesn't interfere with sticky behavior */
+        .main > div {
+            flex-direction: row !important;
+        }
+        
+        /* Better chat message styling */
+        .chat-message-user, .chat-message-assistant {
+            word-wrap: break-word;
+            white-space: normal;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+def apply_theme_css():
     theme = st.session_state.get("theme", "dark")
     
     if theme == "light":
@@ -545,9 +606,6 @@ def apply_theme():
         }
         [data-testid="stAppViewContainer"] {
             background: #FFF8FC;
-        }
-        .main-panel, [data-testid="stVerticalBlock"] {
-            background: transparent;
         }
         .project-card {
             background: #F5EFFF;
@@ -626,6 +684,14 @@ def apply_theme():
         h1, h2, h3, p, span, label {
             color: #4A3A6E;
         }
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
+            background: #F5EFFF;
+        }
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
+            background: #C8A2FF;
+        }
         </style>
         """, unsafe_allow_html=True)
     else:
@@ -637,9 +703,6 @@ def apply_theme():
         }
         [data-testid="stAppViewContainer"] {
             background: #0D1117;
-        }
-        .main-panel, [data-testid="stVerticalBlock"] {
-            background: transparent;
         }
         .project-card {
             background: #111827;
@@ -719,6 +782,14 @@ def apply_theme():
         }
         h1, h2, h3, p, span, label {
             color: #E0E0E0;
+        }
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
+        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
+            background: #00FFFF;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -881,11 +952,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-apply_theme()
+# Apply CSS
+apply_sticky_css()
+apply_theme_css()
 
 # ==================== THEME TOGGLE ====================
-theme_col1, theme_col2 = st.columns([6, 1])
-with theme_col2:
+# Create a hidden container for theme toggle at top right
+col_spacer, col_theme = st.columns([0.95, 0.05])
+with col_theme:
     if st.button("🌙" if st.session_state.theme == "light" else "☀️"):
         st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
         st.rerun()
@@ -893,7 +967,7 @@ with theme_col2:
 # ==================== THREE PANEL LAYOUT ====================
 left_panel, center_panel, right_panel = st.columns([1.3, 4.8, 1.6])
 
-# ==================== LEFT PANEL ====================
+# ==================== LEFT PANEL (STICKY) ====================
 with left_panel:
     st.markdown("## 🔬 ResearchEngine")
     st.markdown("---")
@@ -901,6 +975,7 @@ with left_panel:
     if st.button("➕ New Project", use_container_width=True, type="primary"):
         st.session_state.show_new_project_form = True
         st.session_state.active_project_id = None
+        st.rerun()
     
     st.markdown("---")
     
@@ -939,7 +1014,7 @@ with left_panel:
             is_active = (pid == st.session_state.active_project_id)
             active_class = "active" if is_active else ""
             st.markdown(f"""
-            <div class="project-card {active_class}" onclick="alert('load')">
+            <div class="project-card {active_class}">
                 <div class="project-card-title">{proj['project_name'][:30]}</div>
                 <div class="project-card-date">{proj.get('created_at', 'Unknown date')}</div>
             </div>
@@ -1014,14 +1089,14 @@ if st.session_state.show_new_project_form:
                 st.success("Project created!")
                 st.rerun()
 
-# ==================== CENTER PANEL ====================
+# ==================== CENTER PANEL (SCROLLABLE) ====================
 elif st.session_state.active_project_id and st.session_state.agent:
     pid = st.session_state.active_project_id
     meta = st.session_state.active_meta
     agent = st.session_state.agent
     
     with center_panel:
-        # Metadata Card
+        # Metadata Card (non-sticky, scrolls with chat)
         st.markdown(f"""
         <div class="metadata-card">
             <h2>🔬 {meta['project_name']}</h2>
@@ -1034,8 +1109,10 @@ elif st.session_state.active_project_id and st.session_state.agent:
         
         st.markdown("### 💬 Research Chat")
         
-        # Chat History
+        # Chat History - scrollable container
         messages = load_chat_history(pid)
+        
+        # Use a container for chat messages that will scroll naturally
         chat_container = st.container()
         with chat_container:
             for msg in messages:
@@ -1044,7 +1121,7 @@ elif st.session_state.active_project_id and st.session_state.agent:
                 else:
                     st.markdown(f'<div class="chat-message-assistant">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Chat Input
+        # Chat Input - fixed at bottom of center panel
         prompt = st.chat_input("Ask your research mentor anything...")
         if prompt:
             with st.chat_message("user"):
@@ -1057,7 +1134,7 @@ elif st.session_state.active_project_id and st.session_state.agent:
             append_message(pid, "assistant", response)
             st.rerun()
     
-    # ==================== RIGHT PANEL ====================
+    # ==================== RIGHT PANEL (STICKY) ====================
     with right_panel:
         st.markdown("""
         <div class="quick-actions-panel">
