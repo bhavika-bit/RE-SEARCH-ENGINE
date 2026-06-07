@@ -70,27 +70,51 @@ def append_message(project_id, role, content):
     return messages
 
 def export_project(project_id):
+    """
+    Export metadata + chat history.
+    Does NOT export FAISS vector database.
+    """
     metadata = {}
+
     meta_path = get_metadata_path(project_id)
     if os.path.exists(meta_path):
         with open(meta_path, "r") as f:
             metadata = json.load(f)
+
     export_data = {
         "metadata": metadata,
         "chat_history": load_chat_history(project_id)
     }
+
     return json.dumps(export_data, indent=2)
 
 
 def import_project(uploaded_file):
+    """
+    Import project metadata + chat history.
+    Creates a fresh project ID.
+    """
     data = json.load(uploaded_file)
+
     metadata = data["metadata"]
     chat_history = data.get("chat_history", [])
+
     new_project_id = str(uuid.uuid4())[:8]
+
     metadata["project_id"] = new_project_id
+
     os.makedirs(get_project_path(new_project_id), exist_ok=True)
-    save_metadata(new_project_id, metadata)
-    save_chat_history(new_project_id, chat_history)
+
+    save_metadata(
+        new_project_id,
+        metadata
+    )
+
+    save_chat_history(
+        new_project_id,
+        chat_history
+    )
+
     return new_project_id
 
 
@@ -102,8 +126,10 @@ class RAG:
         self.vectorstore = None
 
     def load_data_from_files(self, uploaded_files, project_id):
+        """Accept Streamlit UploadedFile objects, save to temp, load."""
         self.documents = []
         import tempfile
+
         for uf in uploaded_files:
             ext = os.path.splitext(uf.name)[1].lower()
             with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
@@ -401,11 +427,14 @@ Be detailed and practical.
         return self.llm.invoke(prompt).content
 
     def chat(self, user_message, history):
+        """Chat with context from documents + project info + conversation history."""
         context = self._get_context()
+
         history_text = ""
-        for msg in history[-10:]:
+        for msg in history[-10:]:   # last 10 messages for context window
             role = "User" if msg["role"] == "user" else "Assistant"
             history_text += f"{role}: {msg['content']}\n"
+
         prompt = f"""
 You are an expert research mentor and assistant.
 Project Topic: {self.topic}
@@ -474,191 +503,68 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap');
+    /* ── Dark mode ── */
+    [data-testid="stAppViewContainer"][data-theme="dark"] [data-testid="stSidebar"],
+    .stApp[data-theme="dark"] [data-testid="stSidebar"] {
+        background: #0f1117;
+    }
+    [data-testid="stAppViewContainer"][data-theme="dark"] .project-card,
+    .stApp[data-theme="dark"] .project-card {
+        background: #1e2130;
+        border-left: 3px solid #4f8ef7;
+        color: #ffffff;
+    }
+    [data-testid="stAppViewContainer"][data-theme="dark"] .project-card:hover,
+    .stApp[data-theme="dark"] .project-card:hover {
+        background: #252a40;
+    }
 
-:root { --r8:8px; --r12:12px; --r16:16px; --t:0.15s ease; }
+    /* ── Light mode — pastel palette ── */
+    [data-testid="stAppViewContainer"][data-theme="light"] [data-testid="stSidebar"],
+    .stApp[data-theme="light"] [data-testid="stSidebar"] {
+        background: #f0f4ff;
+    }
+    [data-testid="stAppViewContainer"][data-theme="light"] .project-card,
+    .stApp[data-theme="light"] .project-card {
+        background: #e8eeff;
+        border-left: 3px solid #7ba7f7;
+        color: #2c3e6b;
+    }
+    [data-testid="stAppViewContainer"][data-theme="light"] .project-card:hover,
+    .stApp[data-theme="light"] .project-card:hover {
+        background: #dce6ff;
+    }
 
-/* ── LIGHT — soft lavender pastels ── */
-[data-theme="light"], .stApp[data-theme="light"] {
-    --bg:#f4f2fb; --sb:#edeaf8; --card:#fff; --hover:#ede9fe;
-    --bdr:#ddd6fe; --acc:#6d28d9; --accs:#ede9fe;
-    --t1:#1e1b4b; --t2:#5b5488; --t3:#9d96cc;
-    --qa1:#fce7f3; --qa1f:#831843;
-    --qa2:#fef3c7; --qa2f:#78350f;
-    --qa3:#d1fae5; --qa3f:#064e3b;
-    --qa4:#dbeafe; --qa4f:#1e3a5f;
-    --qa5:#ede9fe; --qa5f:#3b0764;
-    --qa6:#cffafe; --qa6f:#0c4a6e;
-    --qa7:#fef9c3; --qa7f:#713f12;
-    --qa8:#fce7f3; --qa8f:#500724;
-}
-/* ── DARK — deep navy, vibrant actions ── */
-[data-theme="dark"], .stApp[data-theme="dark"] {
-    --bg:#0d0f17; --sb:#11131e; --card:#181b29; --hover:#1f2235;
-    --bdr:#2a2d45; --acc:#818cf8; --accs:#1e2040;
-    --t1:#e8e6ff; --t2:#9d99cc; --t3:#5c5888;
-    --qa1:#ff1a6b; --qa1f:#fff;
-    --qa2:#ff6d00; --qa2f:#fff;
-    --qa3:#00c853; --qa3f:#001a09;
-    --qa4:#2979ff; --qa4f:#fff;
-    --qa5:#9c27b0; --qa5f:#fff;
-    --qa6:#00bcd4; --qa6f:#001a1f;
-    --qa7:#ffd600; --qa7f:#1a1400;
-    --qa8:#e91e63; --qa8f:#fff;
-}
+    /* Fallback: applies when theme attribute is absent (default dark-style) */
+    [data-testid="stSidebar"] {
+        background: #0f1117;
+    }
+    .project-card {
+        background: #1e2130;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        border-left: 3px solid #4f8ef7;
+    }
+    .project-card:hover { background: #252a40; }
 
-/* ── BASE ── */
-.stApp { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
+    /* ── Light mode overrides for main content ── */
+    @media (prefers-color-scheme: light) {
+        [data-testid="stSidebar"] {
+            background: #f0f4ff !important;
+        }
+        .project-card {
+            background: #e8eeff !important;
+            border-left: 3px solid #7ba7f7 !important;
+            color: #2c3e6b !important;
+        }
+        .project-card:hover {
+            background: #dce6ff !important;
+        }
+    }
 
-/* remove streamlit's default page padding so we control all spacing */
-.block-container { padding: 1rem 1rem 5rem 1rem !important; max-width: 100% !important; }
-
-/* ── SIDEBAR ── */
-[data-testid="stSidebar"] {
-    background: var(--sb) !important;
-    border-right: 1px solid var(--bdr) !important;
-}
-[data-testid="stSidebar"] > div:first-child { padding-top: 1.25rem; }
-
-/* sidebar primary button */
-[data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button {
-    background: var(--acc) !important; color: #fff !important;
-    border: none !important; border-radius: var(--r8) !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-weight: 600 !important; font-size: 0.875rem !important;
-}
-/* sidebar project buttons */
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button {
-    background: transparent !important; color: var(--t2) !important;
-    border: 1px solid transparent !important; border-radius: var(--r8) !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.82rem !important; font-weight: 400 !important;
-    text-align: left !important; padding: 8px 10px !important;
-    transition: all var(--t) !important;
-}
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button:hover {
-    background: var(--hover) !important; color: var(--t1) !important;
-    border-color: var(--bdr) !important;
-}
-
-/* ── SECTION MICRO-LABELS ── */
-.lbl {
-    font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--t3);
-    margin: 0 0 0.5rem 0; display: block;
-}
-
-/* ── PROJECT TITLE BLOCK (top of center col) ── */
-.proj-title-block {
-    margin-bottom: 1.25rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--bdr);
-}
-.proj-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.55rem;
-    font-weight: 400;
-    color: var(--t1);
-    margin: 0 0 0.6rem 0;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-}
-.proj-pills {
-    display: flex; flex-wrap: wrap; gap: 6px;
-}
-.pill {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: var(--accs); border: 1px solid var(--bdr);
-    border-radius: 100px; padding: 3px 11px;
-    font-size: 0.71rem; font-weight: 500; color: var(--t2);
-    font-family: 'DM Sans', sans-serif;
-}
-.pill-key { color: var(--t3); font-weight: 400; font-size: 0.68rem; }
-
-/* ── CHAT MESSAGES ── */
-[data-testid="stChatMessage"] {
-    background: var(--card) !important;
-    border: 1px solid var(--bdr) !important;
-    border-radius: var(--r12) !important;
-    margin-bottom: 0.5rem !important;
-    font-family: 'DM Sans', sans-serif !important;
-}
-[data-testid="stChatInputContainer"] {
-    border: 1px solid var(--bdr) !important;
-    border-radius: var(--r12) !important;
-    background: var(--card) !important;
-}
-
-/* ── RIGHT COL: make it visually sticky ── */
-/* Streamlit columns don't support position:sticky natively,
-   but we can set overflow:hidden and a fixed height so content doesn't scroll */
-.qa-panel {
-    position: sticky;
-    top: 1rem;
-}
-
-/* ── QUICK ACTION BUTTONS ── */
-.studio-wrap [data-testid="stVerticalBlock"] > div button {
-    border-radius: var(--r12) !important;
-    min-height: 66px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.75rem !important; font-weight: 600 !important;
-    border: none !important; white-space: pre-wrap !important;
-    line-height: 1.3 !important; width: 100% !important;
-    transition: transform var(--t), filter var(--t) !important;
-}
-.studio-wrap [data-testid="stVerticalBlock"] > div button:hover {
-    transform: translateY(-2px) !important;
-    filter: brightness(1.08) !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
-}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button{background:var(--qa1)!important;color:var(--qa1f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button{background:var(--qa2)!important;color:var(--qa2f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button{background:var(--qa3)!important;color:var(--qa3f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button{background:var(--qa4)!important;color:var(--qa4f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button{background:var(--qa5)!important;color:var(--qa5f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button{background:var(--qa6)!important;color:var(--qa6f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button{background:var(--qa7)!important;color:var(--qa7f)!important;border:none!important;}
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button{background:var(--qa8)!important;color:var(--qa8f)!important;border:none!important;}
-
-/* ── DOWNLOAD BUTTON ── */
-[data-testid="stDownloadButton"] button {
-    background: var(--accs) !important; color: var(--acc) !important;
-    border: 1px solid var(--bdr) !important; border-radius: var(--r8) !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.8rem !important; font-weight: 600 !important;
-}
-[data-testid="stDownloadButton"] button:hover {
-    background: var(--acc) !important; color: #fff !important;
-}
-
-/* ── LEFT COL BORDER ── */
-[data-testid="column"]:first-child {
-    border-right: 1px solid var(--bdr);
-    padding-right: 1rem !important;
-}
-/* ── RIGHT COL BORDER ── */
-[data-testid="column"]:last-child {
-    border-left: 1px solid var(--bdr);
-    padding-left: 1rem !important;
-    background: var(--card);
-}
-
-/* ── RECENT ITEMS ── */
-.recent-item {
-    font-size: 0.73rem; color: var(--t3); padding: 5px 0;
-    border-bottom: 1px solid var(--bdr); line-height: 1.4;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-/* ── FORM / HEADINGS ── */
-h1 { font-family: 'DM Serif Display', serif !important; font-weight: 400 !important; color: var(--t1) !important; }
-[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea {
-    font-family: 'DM Sans', sans-serif !important;
-    border-radius: var(--r8) !important; border: 1px solid var(--bdr) !important;
-    background: var(--card) !important; color: var(--t1) !important;
-}
-hr { border-color: var(--bdr) !important; margin: 0.6rem 0 !important; }
+    .stChatMessage { border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -692,22 +598,25 @@ if "graph" not in st.session_state:
     st.session_state.graph = None
 if "show_new_project_form" not in st.session_state:
     st.session_state.show_new_project_form = False
-if "triggered_feature" not in st.session_state:
-    st.session_state.triggered_feature = None
 
 
 def load_project(project_id):
+    """Load an existing project into session state."""
     meta_path = get_metadata_path(project_id)
     if not os.path.exists(meta_path):
         st.error("Project not found.")
         return
+
     with open(meta_path) as f:
         meta = json.load(f)
+
     faiss_path = get_faiss_path(project_id)
+
     if os.path.exists(faiss_path):
         rag = load_cached_faiss(project_id)
     else:
-        rag = None
+        rag = None  # project was created without documents
+
     llm = get_llm()
     agent = ResearchAnalyst(rag_instance=rag, llm_instance=llm)
     agent.set_project(
@@ -715,104 +624,54 @@ def load_project(project_id):
         problem_statement=meta["problem_statement"],
         timeline=meta["timeline"]
     )
+
     st.session_state.active_project_id = project_id
     st.session_state.agent = agent
     st.session_state.graph = Graph(agent)
     st.session_state.active_meta = meta
 
 
-# ── Feature definitions ──
-FEATURES = [
-    ("📅 Roadmap",       "roadmap",      "Roadmap"),
-    ("🔍 Research Gap",  "gap",          "Research Gap"),
-    ("📚 Learning Path", "learning",     "Learning Path"),
-    ("🧠 Methodology",   "methodology",  "Methodology"),
-    ("📄 Paper Intel",   "paper",        "Paper Intel"),
-    ("🌐 Discovery",     "discovery",    "Discovery"),
-    ("🎓 Mentor",        "mentor",       "Mentor"),
-    ("❓ Quiz",          "quiz",         "Quiz"),
-]
-
-
-# ════════════════════════════════════════════
-# SIDEBAR
-# ════════════════════════════════════════════
 with st.sidebar:
-    st.markdown('<div class="sidebar-brand">🔬 ResearchEngine</div>', unsafe_allow_html=True)
+    st.markdown("## 🔬 ResearchEngine")
     st.markdown("---")
 
     if st.button("＋ New Project", use_container_width=True, type="primary"):
         st.session_state.show_new_project_form = True
         st.session_state.active_project_id = None
 
-    # ── Project list ──
-    st.markdown('<div class="sidebar-section-label">My Projects</div>', unsafe_allow_html=True)
+    st.markdown("### My Projects")
+
     all_projects = load_all_projects()
+
     if not all_projects:
-        st.caption("No projects yet.")
+        st.caption("No projects yet. Create one above.")
     else:
         for proj in all_projects:
             pid = proj["project_id"]
             label = proj["project_name"]
             is_active = (pid == st.session_state.active_project_id)
-            btn_label = f"{'▶  ' if is_active else ''}{label}"
+            btn_label = f"{'▶ ' if is_active else ''}{label}"
             if st.button(btn_label, key=f"proj_{pid}", use_container_width=True):
                 st.session_state.show_new_project_form = False
                 load_project(pid)
                 st.rerun()
 
-    # ── Import ──
-    st.markdown("---")
-    st.markdown('<div class="sidebar-section-label">Import / Export</div>', unsafe_allow_html=True)
-    uploaded_project_file = st.file_uploader("Import project (.json)", type=["json"], label_visibility="collapsed")
+    uploaded_project_file = st.file_uploader(
+        "📥 Import Project",
+        type=["json"]
+    )
+
     if uploaded_project_file is not None:
         try:
             imported_project_id = import_project(uploaded_project_file)
-            st.success("Project imported!")
+            st.success("Project imported successfully!")
             load_project(imported_project_id)
             st.rerun()
         except Exception as e:
             st.error(f"Import failed: {str(e)}")
 
 
-# ════════════════════════════════════════════
-# TRIGGERED FEATURE HANDLER
-# ════════════════════════════════════════════
-if st.session_state.triggered_feature and st.session_state.active_project_id and st.session_state.agent:
-    key   = st.session_state.triggered_feature
-    pid   = st.session_state.active_project_id
-    graph = st.session_state.graph
-    feature_label = next((lbl for lbl, k, *_ in FEATURES if k == key), key)
-
-    with st.spinner(f"Generating {feature_label}..."):
-        state = {}
-        if key == "roadmap":
-            state = graph.roadmap_node(state)
-        elif key == "gap":
-            state = graph.researchgap_node(state)
-        elif key == "learning":
-            state = graph.learning_node(state)
-        elif key == "methodology":
-            state = graph.methodology_node(state)
-        elif key == "paper":
-            state = graph.paperintelligence_node(state)
-        elif key == "discovery":
-            state = graph.researchdiscovery_node(state)
-        elif key == "mentor":
-            state = graph.researchmentor_node(state)
-        elif key == "quiz":
-            state = graph.quizgenerator_node(state)
-        answer = state.get("answer", "")
-
-    append_message(pid, "user", f"Generate: {feature_label}")
-    append_message(pid, "assistant", answer)
-    st.session_state.triggered_feature = None
-    st.rerun()
-
-
-# ════════════════════════════════════════════
 # NEW PROJECT FORM
-# ════════════════════════════════════════════
 if st.session_state.show_new_project_form:
     st.title("Create New Project")
 
@@ -834,6 +693,8 @@ if st.session_state.show_new_project_form:
         else:
             project_id = str(uuid.uuid4())[:8]
             os.makedirs(get_project_path(project_id), exist_ok=True)
+
+            # Process documents if any
             rag = None
             if uploaded_files:
                 with st.spinner("Processing documents..."):
@@ -844,6 +705,8 @@ if st.session_state.show_new_project_form:
                     rag.build_vectordb()
                     rag.save_vectordb(project_id)
                 st.success(f"Loaded {len(rag.documents)} document pages.")
+
+            # Save metadata
             metadata = {
                 "project_id": project_id,
                 "project_name": project_name,
@@ -853,127 +716,136 @@ if st.session_state.show_new_project_form:
                 "has_docs": rag is not None
             }
             save_metadata(project_id, metadata)
+
+            # Load into session
             llm = get_llm()
             agent = ResearchAnalyst(rag_instance=rag, llm_instance=llm)
             agent.set_project(topic=topic, problem_statement=problem_stmt, timeline=timeline)
+
             st.session_state.active_project_id = project_id
             st.session_state.agent = agent
             st.session_state.graph = Graph(agent)
             st.session_state.active_meta = metadata
             st.session_state.show_new_project_form = False
+
+            # Auto project summary as first message
             with st.spinner("Generating project summary..."):
                 summary = agent.projectsummary()
             append_message(project_id, "assistant", f"**Project Summary**\n\n{summary}")
+
             st.success("Project created!")
             st.rerun()
 
 
-# ════════════════════════════════════════════
 # ACTIVE PROJECT VIEW
-# ════════════════════════════════════════════
 elif st.session_state.active_project_id and st.session_state.agent:
     pid   = st.session_state.active_project_id
     meta  = st.session_state.active_meta
     agent = st.session_state.agent
     graph = st.session_state.graph
 
-    left_col, mid_col, right_col = st.columns([0.8, 2.6, 1.1])
+    st.title(f"🔬 {meta['project_name']}")
 
-    # ── LEFT: export + recent history ──
-    with left_col:
-        st.markdown('<span class="lbl">Export</span>', unsafe_allow_html=True)
-        export_data = export_project(pid)
-        st.download_button(
-            label="📤 Export",
-            data=export_data,
-            file_name=f"{meta['project_name']}.json",
-            mime="application/json",
-            use_container_width=True
-        )
-        messages_all = load_chat_history(pid)
-        if messages_all:
-            st.markdown('<span class="lbl" style="margin-top:1.2rem;display:block;">Recent</span>', unsafe_allow_html=True)
-            for msg in messages_all[-6:]:
-                icon = "🧑" if msg["role"] == "user" else "🤖"
-                snippet = msg["content"][:50].replace("\n", " ") + "…"
-                st.markdown(f'<div class="recent-item">{icon} {snippet}</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Topic", meta["topic"][:40] + ("..." if len(meta["topic"]) > 40 else ""))
+    col2.metric("Timeline", meta["timeline"])
+    col3.metric("Docs", "Yes ✅" if meta.get("has_docs") else "No 📄")
 
-    # ── CENTER: title + pills + chat ──
-    with mid_col:
-        topic_s = meta["topic"][:60] + ("…" if len(meta["topic"]) > 60 else "")
-        docs_s  = "✅ Docs" if meta.get("has_docs") else "📄 No docs"
-        st.markdown(
-            f"""
-            <div class="proj-title-block">
-                <div class="proj-title">🔬 {meta['project_name']}</div>
-                <div class="proj-pills">
-                    <span class="pill"><span class="pill-key">Topic</span>{topic_s}</span>
-                    <span class="pill"><span class="pill-key">Timeline</span>{meta['timeline']}</span>
-                    <span class="pill">{docs_s}</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        messages = load_chat_history(pid)
-        for msg in messages:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+    st.markdown("---")
+    st.markdown("### 📦 Project Backup")
 
-    # ── RIGHT: quick actions (sticky via .qa-panel wrapper) ──
-    with right_col:
-        st.markdown('<div class="qa-panel">', unsafe_allow_html=True)
-        st.markdown('<span class="lbl">Quick Actions</span>', unsafe_allow_html=True)
-        st.markdown('<div class="studio-wrap">', unsafe_allow_html=True)
-        STUDIO = [
-            ("📅\nRoadmap",      "roadmap"),
-            ("🔍\nResearch Gap", "gap"),
-            ("📚\nLearning",     "learning"),
-            ("🧠\nMethodology",  "methodology"),
-            ("📄\nPaper Intel",  "paper"),
-            ("🌐\nDiscovery",    "discovery"),
-            ("🎓\nMentor",       "mentor"),
-            ("❓\nQuiz",         "quiz"),
-        ]
-        for i in range(0, len(STUDIO), 2):
-            c1, c2 = st.columns(2)
-            for col, (label, key) in zip([c1, c2], STUDIO[i:i+2]):
-                with col:
-                    if st.button(label, key=f"qa_{key}", use_container_width=True):
-                        st.session_state.triggered_feature = key
-                        st.rerun()
-        st.markdown('</div></div>', unsafe_allow_html=True)
+    export_data = export_project(pid)
+
+    st.download_button(
+        label="📤 Export Project",
+        data=export_data,
+        file_name=f"{meta['project_name']}.json",
+        mime="application/json",
+        use_container_width=True
+    )
+
+    st.markdown("---")
+
+    # ── FEATURE BUTTONS ──
+    st.markdown("### ⚡ Quick Actions")
+    cols = st.columns(4)
+    features = [
+        ("📅 Roadmap",       "roadmap"),
+        ("🔍 Research Gap",  "gap"),
+        ("📚 Learning Path", "learning"),
+        ("🧠 Methodology",   "methodology"),
+        ("📄 Paper Intel",   "paper"),
+        ("🌐 Discovery",     "discovery"),
+        ("🎓 Mentor",        "mentor"),
+        ("❓ Quiz",          "quiz"),
+    ]
+    for i, (label, key) in enumerate(features):
+        if cols[i % 4].button(label, key=f"feat_{key}", use_container_width=True):
+            with st.spinner(f"Generating {label}..."):
+                state = {}
+                if key == "roadmap":
+                    state = graph.roadmap_node(state)
+                elif key == "gap":
+                    state = graph.researchgap_node(state)
+                elif key == "learning":
+                    state = graph.learning_node(state)
+                elif key == "methodology":
+                    state = graph.methodology_node(state)
+                elif key == "paper":
+                    state = graph.paperintelligence_node(state)
+                elif key == "discovery":
+                    state = graph.researchdiscovery_node(state)
+                elif key == "mentor":
+                    state = graph.researchmentor_node(state)
+                elif key == "quiz":
+                    state = graph.quizgenerator_node(state)
+                answer = state.get("answer", "")
+            append_message(pid, "user", f"Generate: {label}")
+            append_message(pid, "assistant", answer)
+            st.rerun()
+
+    st.markdown("---")
+    st.markdown("### 💬 Research Chat")
+
+    # ── DISPLAY CHAT HISTORY ──
+    messages = load_chat_history(pid)
+    for msg in messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
     # ── CHAT INPUT ──
     prompt = st.chat_input("Ask your research mentor anything...")
+
     if prompt:
-        with mid_col:
-            with st.chat_message("user"):
-                st.markdown(prompt)
+        # Show user message immediately
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Save user message
         messages = append_message(pid, "user", prompt)
-        with mid_col:
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    response = agent.chat(prompt, messages)
-                st.markdown(response)
+
+        # Generate response
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = agent.chat(prompt, messages)
+            st.markdown(response)
+
+        # Save assistant response
         append_message(pid, "assistant", response)
         st.rerun()
 
 
-# ════════════════════════════════════════════
-# LANDING / EMPTY STATE
-# ════════════════════════════════════════════
+# ── LANDING / EMPTY STATE ──
 else:
     st.markdown("""
-    <div style="text-align:center; padding: 100px 40px;">
-        <p style="font-family:'DM Serif Display',serif; font-size:2.5rem; font-weight:400; color:var(--text-primary); margin:0 0 0.5rem 0; letter-spacing:-0.02em;">
-            🔬 ResearchEngine
+    <div style="text-align:center; padding: 80px 40px;">
+        <h1>🔬 ResearchEngine</h1>
+        <p style="font-size:1.2rem; color:#888;">
+            Your AI-powered research mentor. Create a project to get started.
         </p>
-        <p style="font-family:'DM Sans',sans-serif; font-size:1.05rem; color:var(--text-muted); margin:0 0 2rem 0;">
-            Your AI-powered research mentor.
-        </p>
-        <p style="font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--text-secondary);">
-            ← Click <strong>＋ New Project</strong> in the sidebar to get started.
+        <br>
+        <p style="color:#555;">
+            ← Click <strong>＋ New Project</strong> in the sidebar
         </p>
     </div>
     """, unsafe_allow_html=True)
