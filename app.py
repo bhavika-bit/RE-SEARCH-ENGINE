@@ -530,11 +530,11 @@ def load_cached_faiss(project_id):
 def get_embeddings():
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# ==================== CSS FOR STICKY LAYOUT ====================
-def apply_layout_css():
+# ==================== CSS FOR STICKY COLUMNS ====================
+def apply_sticky_css():
     st.markdown("""
     <style>
-        /* Hide default Streamlit padding and margin */
+        /* Make the main container full height */
         .main .block-container {
             padding-top: 0rem;
             padding-bottom: 0rem;
@@ -543,77 +543,62 @@ def apply_layout_css():
             padding-right: 0rem;
         }
         
-        /* Create a grid container for the three columns */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 1.3fr 4.8fr 1.6fr;
-            gap: 0rem;
-            height: 100vh;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Target the column containers directly */
+        div[data-testid="column"] {
+            position: relative;
         }
         
-        /* Left Panel - Sticky/Scrollable */
-        .left-panel {
-            background: transparent;
+        /* Left column - sticky */
+        div[data-testid="column"]:nth-of-type(1) > div {
+            position: sticky;
+            top: 0px;
+            height: 100vh;
             overflow-y: auto;
-            padding: 1rem 0.8rem;
-            height: 100vh;
-            scrollbar-width: thin;
+            padding-right: 10px;
         }
         
-        /* Center Panel - Scrolling */
-        .center-panel {
-            background: transparent;
+        /* Right column - sticky */
+        div[data-testid="column"]:nth-of-type(3) > div {
+            position: sticky;
+            top: 0px;
+            height: 100vh;
             overflow-y: auto;
-            padding: 1rem 1.2rem;
-            height: 100vh;
-            scrollbar-width: thin;
+            padding-left: 10px;
         }
         
-        /* Right Panel - Sticky/Scrollable */
-        .right-panel {
-            background: transparent;
-            overflow-y: auto;
-            padding: 1rem 0.8rem;
-            height: 100vh;
-            scrollbar-width: thin;
+        /* Center column - normal scroll */
+        div[data-testid="column"]:nth-of-type(2) > div {
+            overflow-y: visible;
+            height: auto;
         }
         
-        /* Custom scrollbar styling */
-        .left-panel::-webkit-scrollbar,
-        .center-panel::-webkit-scrollbar,
-        .right-panel::-webkit-scrollbar {
+        /* Custom scrollbar for sticky panels */
+        div[data-testid="column"]:nth-of-type(1) > div::-webkit-scrollbar,
+        div[data-testid="column"]:nth-of-type(3) > div::-webkit-scrollbar {
             width: 6px;
         }
         
-        .left-panel::-webkit-scrollbar-track,
-        .center-panel::-webkit-scrollbar-track,
-        .right-panel::-webkit-scrollbar-track {
+        div[data-testid="column"]:nth-of-type(1) > div::-webkit-scrollbar-track,
+        div[data-testid="column"]:nth-of-type(3) > div::-webkit-scrollbar-track {
             background: transparent;
+            border-radius: 3px;
         }
         
-        /* Remove default Streamlit button margins */
-        .stButton button {
-            margin-bottom: 0.2rem;
+        div[data-testid="column"]:nth-of-type(1) > div::-webkit-scrollbar-thumb,
+        div[data-testid="column"]:nth-of-type(3) > div::-webkit-scrollbar-thumb {
+            background: #00FFFF;
+            border-radius: 3px;
         }
         
-        /* Better spacing for project cards */
-        .project-card {
-            margin-bottom: 8px;
-            cursor: pointer;
+        /* Chat message styling */
+        .chat-message-user, .chat-message-assistant {
+            word-wrap: break-word;
+            white-space: normal;
         }
         
-        /* Chat input at bottom of center panel */
-        .chat-input-container {
-            position: sticky;
-            bottom: 0;
-            background: inherit;
-            padding-top: 10px;
-            margin-top: 20px;
+        /* Hide Streamlit's default header padding */
+        header {
+            display: none;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -625,15 +610,7 @@ def apply_theme_css():
         st.markdown("""
         <style>
         /* Light Mode - Pastel Aesthetic */
-        body, .stApp, .dashboard-container {
-            background: #FFF8FC;
-        }
-        .left-panel, .right-panel {
-            background: #F5EFFF;
-            border-right: 1px solid #FFB7D5;
-            border-left: 1px solid #FFB7D5;
-        }
-        .center-panel {
+        .stApp {
             background: #FFF8FC;
         }
         .project-card {
@@ -713,22 +690,17 @@ def apply_theme_css():
         h1, h2, h3, p, span, label {
             color: #4A3A6E;
         }
+        div[data-testid="column"]:nth-of-type(1) > div::-webkit-scrollbar-thumb,
+        div[data-testid="column"]:nth-of-type(3) > div::-webkit-scrollbar-thumb {
+            background: #C8A2FF;
+        }
         </style>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
         <style>
         /* Dark Mode - Cyber Neon Aesthetic */
-        body, .stApp, .dashboard-container {
-            background: #0D1117;
-        }
-        .left-panel, .right-panel {
-            background: #111827;
-            border-right: 1px solid #00FFFF;
-            border-left: 1px solid #00FFFF;
-            box-shadow: 0 0 5px rgba(0,255,255,0.1);
-        }
-        .center-panel {
+        .stApp {
             background: #0D1117;
         }
         .project-card {
@@ -972,24 +944,22 @@ st.set_page_config(
 )
 
 # Apply CSS
-apply_layout_css()
+apply_sticky_css()
 apply_theme_css()
 
 # ==================== THEME TOGGLE ====================
-# Create a hidden container for theme toggle at top right
-col_spacer, col_theme = st.columns([0.95, 0.05])
-with col_theme:
+# Create a row for theme toggle at the very top
+col1, col2, col3 = st.columns([1, 8, 1])
+with col3:
     if st.button("🌙" if st.session_state.theme == "light" else "☀️"):
         st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
         st.rerun()
 
-# ==================== THREE PANEL LAYOUT USING HTML GRID ====================
-# Start the dashboard container
-st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+# ==================== THREE PANEL LAYOUT ====================
+left_panel, center_panel, right_panel = st.columns([1.3, 4.8, 1.6])
 
-# LEFT PANEL
-st.markdown('<div class="left-panel">', unsafe_allow_html=True)
-with st.container():
+# ==================== LEFT PANEL (STICKY) ====================
+with left_panel:
     st.markdown("## 🔬 ResearchEngine")
     st.markdown("---")
     
@@ -1044,12 +1014,10 @@ with st.container():
                 st.session_state.show_new_project_form = False
                 load_project(pid)
                 st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== NEW PROJECT FORM ====================
 if st.session_state.show_new_project_form:
-    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
-    with st.container():
+    with center_panel:
         st.title("✨ Create New Project")
         with st.form("new_project_form"):
             project_name = st.text_input("Project Name", placeholder="e.g. Crime Hotspot Analysis")
@@ -1111,9 +1079,6 @@ if st.session_state.show_new_project_form:
                 
                 st.success("Project created!")
                 st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="right-panel"></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== CENTER PANEL (SCROLLABLE) ====================
 elif st.session_state.active_project_id and st.session_state.agent:
@@ -1121,10 +1086,8 @@ elif st.session_state.active_project_id and st.session_state.agent:
     meta = st.session_state.active_meta
     agent = st.session_state.agent
     
-    # CENTER PANEL
-    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
-    with st.container():
-        # Metadata Card (non-sticky, scrolls with chat)
+    with center_panel:
+        # Metadata Card
         st.markdown(f"""
         <div class="metadata-card">
             <h2>🔬 {meta['project_name']}</h2>
@@ -1158,11 +1121,9 @@ elif st.session_state.active_project_id and st.session_state.agent:
                 st.markdown(response)
             append_message(pid, "assistant", response)
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # ==================== RIGHT PANEL (STICKY) ====================
-    st.markdown('<div class="right-panel">', unsafe_allow_html=True)
-    with st.container():
+    with right_panel:
         st.markdown("""
         <div class="quick-actions-panel">
             <h3 style="margin-top:0;">⚡ Quick Actions</h3>
@@ -1233,14 +1194,9 @@ elif st.session_state.active_project_id and st.session_state.agent:
             st.markdown("---")
             st.markdown("### 🃏 Active Flashcards")
             render_flashcards()
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Close the dashboard container
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== LANDING PAGE ====================
 else:
-    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center; padding: 80px 40px;">
         <h1>🔬 ResearchEngine</h1>
@@ -1253,6 +1209,3 @@ else:
         </p>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="right-panel"></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
