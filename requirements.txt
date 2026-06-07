@@ -12,6 +12,8 @@ faiss-cpu
 sentence-transformers
 transformers
 huggingface-hub
+torch
+torchvision
 
 pymupdf
 docx2txt
