@@ -566,164 +566,69 @@ st.markdown("""
 
     .stChatMessage { border-radius: 10px; }
 
-    /* ══ STUDIO PANEL cards ══ */
-    .studio-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 8px;
-    }
-    .studio-card {
-        border-radius: 14px;
-        padding: 14px 8px 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        font-size: 0.76rem;
-        font-weight: 700;
-        text-align: center;
-        line-height: 1.2;
-        min-height: 78px;
-        transition: transform 0.15s ease, filter 0.15s ease;
-        cursor: pointer;
-    }
-    .studio-card:hover { transform: translateY(-2px); filter: brightness(1.08); }
-    .studio-card .ci { font-size: 1.45rem; line-height: 1; }
+    /* ══ STUDIO — style the sub-column buttons inside right_col ══
+       We target [data-testid="column"]:last-child which is right_col,
+       then the nested columns inside it via .studio-col class on their wrapper.
+       Easiest: give each button a unique key like studio-btn-N and target by key attr. */
 
-    /* dark vibrant */
-    .sc-roadmap     { background:#ff2d6b; color:#fff; }
-    .sc-gap         { background:#ff7a00; color:#fff; }
-    .sc-learning    { background:#00c853; color:#001a09; }
-    .sc-methodology { background:#2979ff; color:#fff; }
-    .sc-paper       { background:#aa00ff; color:#fff; }
-    .sc-discovery   { background:#00b8d4; color:#001a1f; }
-    .sc-mentor      { background:#ffd600; color:#221c00; }
-    .sc-quiz        { background:#f50057; color:#fff; }
-
-    /* light pastels — override via media query */
-    @media (prefers-color-scheme: light) {
-        .sc-roadmap     { background:#ffd6e0; color:#7a2240; }
-        .sc-gap         { background:#ffe5cc; color:#7a3d10; }
-        .sc-learning    { background:#d4f0c8; color:#255c18; }
-        .sc-methodology { background:#cde8ff; color:#0d3d6b; }
-        .sc-paper       { background:#ead5fb; color:#4a1d80; }
-        .sc-discovery   { background:#c8f0ee; color:#0d4f4c; }
-        .sc-mentor      { background:#fff3c4; color:#6b4d00; }
-        .sc-quiz        { background:#ffd6f5; color:#6b0d55; }
-    }
-    /* data-theme light override */
-    [data-theme="light"] .sc-roadmap, .stApp[data-theme="light"] .sc-roadmap
-        { background:#ffd6e0 !important; color:#7a2240 !important; }
-    [data-theme="light"] .sc-gap, .stApp[data-theme="light"] .sc-gap
-        { background:#ffe5cc !important; color:#7a3d10 !important; }
-    [data-theme="light"] .sc-learning, .stApp[data-theme="light"] .sc-learning
-        { background:#d4f0c8 !important; color:#255c18 !important; }
-    [data-theme="light"] .sc-methodology, .stApp[data-theme="light"] .sc-methodology
-        { background:#cde8ff !important; color:#0d3d6b !important; }
-    [data-theme="light"] .sc-paper, .stApp[data-theme="light"] .sc-paper
-        { background:#ead5fb !important; color:#4a1d80 !important; }
-    [data-theme="light"] .sc-discovery, .stApp[data-theme="light"] .sc-discovery
-        { background:#c8f0ee !important; color:#0d4f4c !important; }
-    [data-theme="light"] .sc-mentor, .stApp[data-theme="light"] .sc-mentor
-        { background:#fff3c4 !important; color:#6b4d00 !important; }
-    [data-theme="light"] .sc-quiz, .stApp[data-theme="light"] .sc-quiz
-        { background:#ffd6f5 !important; color:#6b0d55 !important; }
-
-    /* hide the raw streamlit buttons inside studio — we render pure HTML cards above them */
-    .studio-btn-hidden button {
-        opacity: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
+    /* Base style for ALL studio buttons */
+    [data-testid="stBaseButton-secondary"] {
+        border-radius: 16px !important;
+        min-height: 90px !important;
+        font-size: 0.80rem !important;
+        font-weight: 700 !important;
         border: none !important;
-        pointer-events: none !important;
-        position: absolute;
+        white-space: pre-wrap !important;
+        line-height: 1.3 !important;
+        transition: transform 0.15s ease, filter 0.15s ease !important;
+    }
+    [data-testid="stBaseButton-secondary"]:hover {
+        transform: translateY(-3px) !important;
+        filter: brightness(1.1) !important;
     }
 
-    /* ── Quick Action buttons — shared base ── */
-    .quick-action-btn {
-        display: block;
-        width: 100%;
-        padding: 10px 14px;
-        margin-bottom: 7px;
-        border-radius: 9px;
-        border: none;
-        font-size: 0.88rem;
-        font-weight: 600;
-        text-align: left;
-        cursor: pointer;
-        transition: filter 0.15s ease, transform 0.1s ease;
-        letter-spacing: 0.01em;
+    /* Target each studio button by its key — dark vibrant defaults */
+    [data-testid="stBaseButton-secondary"][kind="secondary"]#qa_roadmap_btn button,
+    button[kind="secondary"][data-testid*="qa_roadmap"] { background:#ff2d6b !important; color:#fff !important; }
+
+    /* Simpler: target by position inside the studio wrapper div */
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ff2d6b !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ff7a00 !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#00c853 !important; color:#001a09 !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#2979ff !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#aa00ff !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#00b8d4 !important; color:#001a1f !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#ffd600 !important; color:#221c00 !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+    .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#f50057 !important; color:#fff !important; border:none !important; border-radius:16px !important; min-height:90px !important; font-weight:700 !important; }
+
+    /* light mode pastels */
+    @media (prefers-color-scheme: light) {
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ffd6e0 !important; color:#7a2240 !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ffe5cc !important; color:#7a3d10 !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#d4f0c8 !important; color:#255c18 !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#cde8ff !important; color:#0d3d6b !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#ead5fb !important; color:#4a1d80 !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#c8f0ee !important; color:#0d4f4c !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#fff3c4 !important; color:#6b4d00 !important; }
+        .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#ffd6f5 !important; color:#6b0d55 !important; }
     }
-    .quick-action-btn:hover {
-        filter: brightness(1.08);
-        transform: translateX(2px);
-    }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:#ffd6e0 !important; color:#7a2240 !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:#ffe5cc !important; color:#7a3d10 !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:#d4f0c8 !important; color:#255c18 !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:#cde8ff !important; color:#0d3d6b !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:#ead5fb !important; color:#4a1d80 !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:#c8f0ee !important; color:#0d4f4c !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:#fff3c4 !important; color:#6b4d00 !important; }
+    [data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button,
+    .stApp[data-theme="light"] .studio-wrapper [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:#ffd6f5 !important; color:#6b0d55 !important; }
 
-    /* ── LIGHT MODE pastel — target the right column's stButton elements ── */
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(1) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(1) button
-        { background: #ffd6e0 !important; color: #7a2240 !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(2) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(2) button
-        { background: #fde2c8 !important; color: #7a3d10 !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(3) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(3) button
-        { background: #d4f0c8 !important; color: #255c18 !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(4) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(4) button
-        { background: #cde8ff !important; color: #0d3d6b !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(5) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(5) button
-        { background: #e8d5fb !important; color: #4a1d80 !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(6) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(6) button
-        { background: #c8f0ee !important; color: #0d4f4c !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(7) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(7) button
-        { background: #fff3c4 !important; color: #6b4d00 !important; border: none !important; }
-    [data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(8) button,
-    .stApp[data-theme="light"] [data-testid="column"]:last-child .stButton:nth-child(8) button
-        { background: #ffd6f5 !important; color: #6b0d55 !important; border: none !important; }
-
-    /* ── DARK MODE vibrant — same right column targeting ── */
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(1) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(1) button
-        { background: #ff2d6b !important; color: #fff !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(2) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(2) button
-        { background: #ff7a00 !important; color: #fff !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(3) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(3) button
-        { background: #00e676 !important; color: #002b15 !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(4) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(4) button
-        { background: #2979ff !important; color: #fff !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(5) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(5) button
-        { background: #d500f9 !important; color: #fff !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(6) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(6) button
-        { background: #00e5ff !important; color: #002b30 !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(7) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(7) button
-        { background: #ffea00 !important; color: #2b2500 !important; border: none !important; }
-    [data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(8) button,
-    .stApp[data-theme="dark"] [data-testid="column"]:last-child .stButton:nth-child(8) button
-        { background: #ff4081 !important; color: #fff !important; border: none !important; }
-
-    /* Fallback dark (no data-theme attr) */
-    [data-testid="column"]:last-child .stButton:nth-child(1) button { background: #ff2d6b !important; color: #fff !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(2) button { background: #ff7a00 !important; color: #fff !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(3) button { background: #00e676 !important; color: #002b15 !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(4) button { background: #2979ff !important; color: #fff !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(5) button { background: #d500f9 !important; color: #fff !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(6) button { background: #00e5ff !important; color: #002b30 !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(7) button { background: #ffea00 !important; color: #2b2500 !important; border: none !important; }
-    [data-testid="column"]:last-child .stButton:nth-child(8) button { background: #ff4081 !important; color: #fff !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -851,7 +756,7 @@ if st.session_state.triggered_feature and st.session_state.active_project_id and
     pid   = st.session_state.active_project_id
     graph = st.session_state.graph
 
-    feature_label = next((lbl for lbl, k, *_ in FEATURES if k == key), key)
+    feature_label = next((k for lbl, k, *_ in FEATURES if k == key), key).replace("_", " ").title()
 
     with st.spinner(f"Generating {feature_label}..."):
         state = {}
@@ -989,24 +894,55 @@ elif st.session_state.active_project_id and st.session_state.agent:
                 st.markdown(msg["content"])
 
     # ════════════════════════════════
-    # RIGHT COLUMN — Studio / Quick Actions (NotebookLM-style)
+    # RIGHT COLUMN — Studio / Quick Actions (2×4 grid)
     # ════════════════════════════════
     with right_col:
         st.markdown("#### ⚡ Studio")
+        st.markdown('<div class="studio-wrapper">', unsafe_allow_html=True)
 
-        # Render 2-col grid of styled HTML cards (visual only)
-        cards_html = '<div class="studio-grid">'
-        for _, key, css_class, icon, short in FEATURES:
-            cards_html += f'<div class="studio-card {css_class}"><span class="ci">{icon}</span>{short}</div>'
-        cards_html += '</div>'
-        st.markdown(cards_html, unsafe_allow_html=True)
+        # Define colors inline per button using unique keys styled via CSS
+        STUDIO = [
+            ("📅\nRoadmap",       "roadmap",      "#ff2d6b", "#fff"),
+            ("🔍\nResearch Gap",  "gap",           "#ff7a00", "#fff"),
+            ("📚\nLearning Path", "learning",      "#00c853", "#001a09"),
+            ("🧠\nMethodology",   "methodology",   "#2979ff", "#fff"),
+            ("📄\nPaper Intel",   "paper",         "#aa00ff", "#fff"),
+            ("🌐\nDiscovery",     "discovery",     "#00b8d4", "#001a1f"),
+            ("🎓\nMentor",        "mentor",        "#ffd600", "#221c00"),
+            ("❓\nQuiz",          "quiz",          "#f50057", "#fff"),
+        ]
 
-        # Render actual clickable Streamlit buttons below (invisible but functional)
-        st.markdown('<div style="margin-top:8px">', unsafe_allow_html=True)
-        for label, key, css_class, icon, short in FEATURES:
-            if st.button(label, key=f"qa_{key}", use_container_width=True):
-                st.session_state.triggered_feature = key
-                st.rerun()
+        # Render pairs as 2-column rows
+        for i in range(0, len(STUDIO), 2):
+            c1, c2 = st.columns(2)
+            for col, (label, key, bg, fg) in zip([c1, c2], STUDIO[i:i+2]):
+                with col:
+                    st.markdown(
+                        f"""<style>
+                        div[data-testid="stButton"]:has(button[kind="secondary"][data-testid="qa_{key}"]) button,
+                        button[data-testid="qa_{key}"] {{
+                            background: {bg} !important;
+                            color: {fg} !important;
+                            border: none !important;
+                            border-radius: 16px !important;
+                            min-height: 88px !important;
+                            font-size: 0.82rem !important;
+                            font-weight: 700 !important;
+                            white-space: pre-wrap !important;
+                            line-height: 1.35 !important;
+                            width: 100% !important;
+                        }}
+                        button[data-testid="qa_{key}"]:hover {{
+                            filter: brightness(1.12) !important;
+                            transform: translateY(-2px) !important;
+                        }}
+                        </style>""",
+                        unsafe_allow_html=True
+                    )
+                    if st.button(label, key=f"qa_{key}", use_container_width=True):
+                        st.session_state.triggered_feature = key
+                        st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
 
     # ── CHAT INPUT (page-level — Streamlit requires this outside columns) ──
