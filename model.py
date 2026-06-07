@@ -198,6 +198,16 @@ Generate:
 3. Learning sources
 4. Applications of the concept
 5. Suggestions to study
+6.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 
 Be detailed and practical.
 """
@@ -299,6 +309,16 @@ Generate:
 6. Conferences and journals to follow
 7. Useful resources and repositories
 8. Future directions in the field
+9.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 
 Be detailed and practical.
 """
@@ -348,6 +368,16 @@ Generate:
 3. Project scope
 4. comparison with current research and trends
 5. idea feasibility
+6.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 
 Be detailed and practical.
 """
