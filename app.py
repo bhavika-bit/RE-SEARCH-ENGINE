@@ -707,6 +707,52 @@ hr { border-color: var(--border) !important; margin: 0.6rem 0 !important; }
 
 /* hide streamlit default menu clutter in columns */
 [data-testid="stToolbar"] { display: none !important; }
+
+/* ── PROJECT TOPBAR — spans full main area width ── */
+.proj-topbar {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.proj-topbar-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--txt);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.proj-topbar-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.proj-pill {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 2px 10px;
+    font-size: 0.71rem;
+    font-weight: 500;
+    color: var(--txt2);
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+}
+.proj-pill b { color: var(--txt3); font-weight: 500; }
+
+/* Topbar lives ABOVE the 3-col block — adjust col heights */
+/* The topbar is ~52px; columns fill the rest */
+[data-testid="stHorizontalBlock"] {
+    height: calc(100vh - 52px) !important;
+}
+[data-testid="column"] {
+    height: calc(100vh - 52px) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -925,33 +971,34 @@ elif st.session_state.active_project_id and st.session_state.agent:
     agent = st.session_state.agent
     graph = st.session_state.graph
 
-    # columns: left info | center chat | right actions
-    left_col, mid_col, right_col = st.columns([0.95, 2.6, 1.05])
-
-    # ════════════════════════════
-    # LEFT — compact project info + export + recents
-    # ════════════════════════════
-    with left_col:
-        topic_short = meta['topic'][:34] + ('…' if len(meta['topic']) > 34 else '')
-        docs_badge  = '✅ Docs attached' if meta.get('has_docs') else '📄 No docs'
-        st.markdown(
-            f"""
-            <div class="proj-header">
-                <p class="proj-header-title">🔬 {meta['project_name']}</p>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;">
-                <span class="proj-pill"><b>Topic</b>{topic_short}</span>
-                <span class="proj-pill"><b>Timeline</b>{meta['timeline']}</span>
+    # ── PROJECT TITLE BAR — full width, top of main area ──
+    topic_short = meta['topic'][:50] + ('…' if len(meta['topic']) > 50 else '')
+    docs_badge  = '✅ Docs' if meta.get('has_docs') else '📄 No docs'
+    st.markdown(
+        f"""
+        <div class="proj-topbar">
+            <div class="proj-topbar-title">🔬 {meta['project_name']}</div>
+            <div class="proj-topbar-pills">
+                <span class="proj-pill"><b>Topic&nbsp;</b>{topic_short}</span>
+                <span class="proj-pill"><b>Timeline&nbsp;</b>{meta['timeline']}</span>
                 <span class="proj-pill">{docs_badge}</span>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
+    # ── 3-COLUMN BODY ──
+    left_col, mid_col, right_col = st.columns([0.85, 2.7, 1.05])
+
+    # ════════════════════════════
+    # LEFT — export + recents only
+    # ════════════════════════════
+    with left_col:
         st.markdown('<div class="sb-label">Export</div>', unsafe_allow_html=True)
         export_data = export_project(pid)
         st.download_button(
-            label="📤 Export Project",
+            label="📤 Export",
             data=export_data,
             file_name=f"{meta['project_name']}.json",
             mime="application/json",
@@ -960,24 +1007,23 @@ elif st.session_state.active_project_id and st.session_state.agent:
 
         messages_all = load_chat_history(pid)
         if messages_all:
-            st.markdown('<div class="sb-label" style="margin-top:1rem;">Recent</div>', unsafe_allow_html=True)
-            for msg in messages_all[-5:]:
+            st.markdown('<div class="sb-label" style="margin-top:1.2rem;">Recent</div>', unsafe_allow_html=True)
+            for msg in messages_all[-6:]:
                 icon = "🧑" if msg["role"] == "user" else "🤖"
-                snippet = msg["content"][:55].replace("\n", " ") + "…"
+                snippet = msg["content"][:52].replace("\n", " ") + "…"
                 st.markdown(f'<div class="recent-item">{icon} {snippet}</div>', unsafe_allow_html=True)
 
     # ════════════════════════════
     # CENTER — scrollable chat
     # ════════════════════════════
     with mid_col:
-        st.markdown('<div class="sec-label">Research Chat</div>', unsafe_allow_html=True)
         messages = load_chat_history(pid)
         for msg in messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
     # ════════════════════════════
-    # RIGHT — sticky quick actions
+    # RIGHT — fixed quick actions
     # ════════════════════════════
     with right_col:
         st.markdown('<div class="sec-label">Quick Actions</div>', unsafe_allow_html=True)
