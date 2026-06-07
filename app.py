@@ -474,378 +474,239 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* ─── GOOGLE FONT ─── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap');
 
-/* ─── ROOT TOKENS ─── */
-:root {
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --transition: 0.18s ease;
+:root { --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --t:0.16s ease; }
+
+/* ── LIGHT ── */
+[data-theme="light"], .stApp[data-theme="light"] {
+    --bg-app:#f4f2fb; --bg-sb:#edeaf8; --bg-card:#ffffff;
+    --bg-hover:#ede9fe; --border:#ddd6fe; --accent:#6d28d9;
+    --accent-soft:#ede9fe; --txt:#1e1b4b; --txt2:#5b5488; --txt3:#9d96cc;
+    --qa1:#fce7f3; --qa1f:#831843; --qa2:#fef3c7; --qa2f:#78350f;
+    --qa3:#d1fae5; --qa3f:#064e3b; --qa4:#dbeafe; --qa4f:#1e3a5f;
+    --qa5:#ede9fe; --qa5f:#3b0764; --qa6:#cffafe; --qa6f:#0c4a6e;
+    --qa7:#fef9c3; --qa7f:#713f12; --qa8:#fce7f3; --qa8f:#500724;
+}
+/* ── DARK ── */
+[data-theme="dark"], .stApp[data-theme="dark"] {
+    --bg-app:#0d0f17; --bg-sb:#11131e; --bg-card:#181b29;
+    --bg-hover:#1f2235; --border:#2a2d45; --accent:#818cf8;
+    --accent-soft:#1e2040; --txt:#e8e6ff; --txt2:#9d99cc; --txt3:#5c5888;
+    --qa1:#ff1a6b; --qa1f:#fff; --qa2:#ff6d00; --qa2f:#fff;
+    --qa3:#00c853; --qa3f:#001a09; --qa4:#2979ff; --qa4f:#fff;
+    --qa5:#9c27b0; --qa5f:#fff; --qa6:#00bcd4; --qa6f:#001a1f;
+    --qa7:#ffd600; --qa7f:#1a1400; --qa8:#e91e63; --qa8f:#fff;
 }
 
-/* ════════════════════════════
-   LIGHT MODE  (pastel palette)
-   ════════════════════════════ */
-[data-theme="light"],
-.stApp[data-theme="light"] {
-    --bg-app:        #f5f3ff;
-    --bg-sidebar:    #ede9fe;
-    --bg-card:       #ffffff;
-    --bg-card-hover: #f3f0ff;
-    --bg-info:       #ffffff;
-    --bg-chat:       #faf9ff;
-    --border:        #ddd6fe;
-    --accent:        #7c3aed;
-    --accent-soft:   #ede9fe;
-    --text-primary:  #1e1b4b;
-    --text-secondary:#5b5488;
-    --text-muted:    #8b7fc7;
+/* ── APP SHELL: full height, no overflow ── */
+html, body, .stApp { height: 100vh; overflow: hidden !important; }
+.stApp { background: var(--bg-app) !important; font-family: 'DM Sans', sans-serif; }
 
-    /* quick-action button palette — pastels */
-    --qa1-bg:#fce7f3; --qa1-fg:#831843;
-    --qa2-bg:#fef3c7; --qa2-fg:#78350f;
-    --qa3-bg:#d1fae5; --qa3-fg:#064e3b;
-    --qa4-bg:#dbeafe; --qa4-fg:#1e3a5f;
-    --qa5-bg:#ede9fe; --qa5-fg:#3b0764;
-    --qa6-bg:#cffafe; --qa6-fg:#0c4a6e;
-    --qa7-bg:#fef9c3; --qa7-fg:#713f12;
-    --qa8-bg:#fce7f3; --qa8-fg:#500724;
+/* kill default streamlit top padding */
+.block-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 }
 
-/* ════════════════════════════
-   DARK MODE  (vibrant palette)
-   ════════════════════════════ */
-[data-theme="dark"],
-.stApp[data-theme="dark"] {
-    --bg-app:        #0d0f17;
-    --bg-sidebar:    #11131e;
-    --bg-card:       #181b29;
-    --bg-card-hover: #1f2235;
-    --bg-info:       #181b29;
-    --bg-chat:       #13151f;
-    --border:        #2a2d45;
-    --accent:        #818cf8;
-    --accent-soft:   #1e2040;
-    --text-primary:  #e8e6ff;
-    --text-secondary:#9d99cc;
-    --text-muted:    #5c5888;
-
-    /* quick-action button palette — vibrant */
-    --qa1-bg:#ff1a6b; --qa1-fg:#ffffff;
-    --qa2-bg:#ff6d00; --qa2-fg:#ffffff;
-    --qa3-bg:#00c853; --qa3-fg:#001a09;
-    --qa4-bg:#2979ff; --qa4-fg:#ffffff;
-    --qa5-bg:#9c27b0; --qa5-fg:#ffffff;
-    --qa6-bg:#00bcd4; --qa6-fg:#001a1f;
-    --qa7-bg:#ffd600; --qa7-fg:#1a1400;
-    --qa8-bg:#e91e63; --qa8-fg:#ffffff;
-}
-
-/* ─── SIDEBAR ─── */
+/* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background: var(--bg-sidebar) !important;
+    background: var(--bg-sb) !important;
     border-right: 1px solid var(--border) !important;
-    padding-top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
 }
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 1.5rem;
-}
+[data-testid="stSidebar"] > div:first-child { padding-top: 1.25rem; }
 
-/* sidebar logo/title */
-.sidebar-brand {
+.sb-brand {
     font-family: 'DM Serif Display', serif;
-    font-size: 1.25rem;
-    font-weight: 400;
+    font-size: 1.15rem;
     color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 0 1rem 0;
-    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 7px;
+    padding-bottom: 0.75rem;
+}
+.sb-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--txt3);
+    margin: 1rem 0 0.4rem 0;
 }
 
-/* section labels in sidebar */
-.sidebar-section-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 1.2rem 0 0.5rem 0;
-}
-
-/* project list items */
-.proj-item {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    padding: 9px 12px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    color: var(--text-secondary);
-    border: 1px solid transparent;
-    margin-bottom: 4px;
-    transition: all var(--transition);
-    background: transparent;
-}
-.proj-item:hover {
-    background: var(--bg-card-hover);
-    color: var(--text-primary);
-    border-color: var(--border);
-}
-.proj-item.active {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-color: var(--accent);
-    font-weight: 600;
-}
-
-/* ─── NEW PROJECT BUTTON ─── */
+/* sidebar new project button */
 [data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button {
-    background: var(--accent) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: var(--radius-sm) !important;
+    background: var(--accent) !important; color: #fff !important;
+    border: none !important; border-radius: var(--radius-sm) !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    letter-spacing: 0.01em !important;
-    padding: 0.5rem 1rem !important;
-    transition: opacity var(--transition) !important;
+    font-size: 0.85rem !important; font-weight: 600 !important;
 }
-[data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button:hover {
-    opacity: 0.88 !important;
-}
-
-/* sidebar project buttons */
+/* sidebar project list buttons */
 [data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button {
-    background: transparent !important;
-    color: var(--text-secondary) !important;
+    background: transparent !important; color: var(--txt2) !important;
     border: 1px solid transparent !important;
     border-radius: var(--radius-sm) !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.875rem !important;
-    text-align: left !important;
-    padding: 9px 12px !important;
-    transition: all var(--transition) !important;
-    font-weight: 400 !important;
+    font-size: 0.82rem !important; font-weight: 400 !important;
+    text-align: left !important; padding: 8px 10px !important;
+    transition: all var(--t) !important;
 }
 [data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button:hover {
-    background: var(--bg-card-hover) !important;
-    color: var(--text-primary) !important;
+    background: var(--bg-hover) !important; color: var(--txt) !important;
     border-color: var(--border) !important;
 }
 
-/* ─── MAIN AREA ─── */
-.stApp {
-    background: var(--bg-app) !important;
-    font-family: 'DM Sans', sans-serif;
-}
-.block-container {
-    padding: 1.5rem 2rem 4rem 2rem !important;
-    max-width: 100% !important;
+/* ── MAIN 3-COLUMN WRAPPER ── */
+/* The columns row must fill viewport height minus nothing (we removed all padding) */
+[data-testid="stHorizontalBlock"] {
+    height: calc(100vh - 0px) !important;
+    align-items: stretch !important;
+    gap: 0 !important;
 }
 
-/* ─── PROJECT BANNER (top of center) ─── */
-.project-banner {
-    background: var(--bg-info);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
+/* Each column fills full height */
+[data-testid="column"] {
+    height: 100vh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
 }
-.project-banner h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--text-primary);
-    margin: 0 0 0.75rem 0;
-    line-height: 1.2;
+
+/* ── LEFT COL: scrollable ── */
+[data-testid="column"]:nth-child(1) {
+    overflow-y: auto !important;
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem !important;
+    background: var(--bg-app);
 }
-.info-pills {
+
+/* ── CENTER COL: scrollable chat ── */
+[data-testid="column"]:nth-child(2) {
+    overflow-y: auto !important;
+    padding: 1.25rem 1.25rem 6rem 1.25rem !important;
+    background: var(--bg-app);
+}
+
+/* ── RIGHT COL: fixed, no scroll ── */
+[data-testid="column"]:nth-child(3) {
+    overflow: hidden !important;
+    border-left: 1px solid var(--border);
+    padding: 1.25rem 0.85rem !important;
+    background: var(--bg-card);
+    position: sticky !important;
+    top: 0 !important;
+}
+
+/* ── PROJECT HEADER (compact horizontal strip) ── */
+.proj-header {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
 }
-.info-pill {
+.proj-header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--txt);
+    margin: 0;
+    line-height: 1.25;
+    flex: 1;
+    min-width: 120px;
+}
+.proj-pill {
     background: var(--accent-soft);
     border: 1px solid var(--border);
     border-radius: 100px;
-    padding: 3px 12px;
-    font-size: 0.78rem;
+    padding: 2px 10px;
+    font-size: 0.72rem;
     font-weight: 500;
-    color: var(--text-secondary);
-    font-family: 'DM Sans', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    color: var(--txt2);
+    white-space: nowrap;
 }
-.info-pill span.pill-label {
-    color: var(--text-muted);
-    font-weight: 400;
-    font-size: 0.72rem;
+.proj-pill b { color: var(--txt3); font-weight: 400; margin-right: 3px; }
+
+/* ── SECTION LABELS ── */
+.sec-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--txt3); margin: 0 0 0.6rem 0;
 }
 
-/* ─── SECTION HEADERS ─── */
-.section-header {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 0 0 0.75rem 0;
-}
-
-/* ─── CHAT AREA ─── */
-.chat-container {
-    background: var(--bg-chat);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1rem;
-    min-height: 300px;
-}
+/* ── CHAT MESSAGES ── */
 [data-testid="stChatMessage"] {
     background: var(--bg-card) !important;
-    border-radius: var(--radius-md) !important;
     border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
     margin-bottom: 0.5rem !important;
     font-family: 'DM Sans', sans-serif !important;
 }
-
-/* chat input */
 [data-testid="stChatInputContainer"] {
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-md) !important;
     background: var(--bg-card) !important;
 }
 
-/* ─── QUICK ACTIONS PANEL ─── */
-.qa-header {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 0 0 0.75rem 0;
-}
-.qa-panel {
-    background: var(--bg-info);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1rem;
-}
-
-/* quick-action buttons base */
-div[class*="qa-panel"] [data-testid="stBaseButton-secondary"] button,
-.qa-panel ~ div [data-testid="stBaseButton-secondary"] button {
+/* ── QUICK ACTION BUTTONS ── */
+.studio-wrap [data-testid="stVerticalBlock"] > div button {
     border-radius: var(--radius-md) !important;
-    min-height: 72px !important;
+    min-height: 68px !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    border: none !important;
-    white-space: pre-wrap !important;
-    line-height: 1.4 !important;
-    transition: transform var(--transition), filter var(--transition) !important;
+    font-size: 0.76rem !important; font-weight: 600 !important;
+    border: none !important; white-space: pre-wrap !important;
+    line-height: 1.35 !important; width: 100% !important;
+    transition: transform var(--t), filter var(--t) !important;
 }
-
-/* individual QA button colors via nth-child on the studio wrapper */
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button { background: var(--qa1-bg) !important; color: var(--qa1-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button { background: var(--qa2-bg) !important; color: var(--qa2-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button { background: var(--qa3-bg) !important; color: var(--qa3-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button { background: var(--qa4-bg) !important; color: var(--qa4-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button { background: var(--qa5-bg) !important; color: var(--qa5-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button { background: var(--qa6-bg) !important; color: var(--qa6-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button { background: var(--qa7-bg) !important; color: var(--qa7-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button { background: var(--qa8-bg) !important; color: var(--qa8-fg) !important; border:none !important; border-radius:var(--radius-md) !important; min-height:72px !important; font-family:'DM Sans',sans-serif !important; font-size:0.78rem !important; font-weight:600 !important; }
 .studio-wrap [data-testid="stVerticalBlock"] > div button:hover {
     transform: translateY(-2px) !important;
     filter: brightness(1.08) !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18) !important;
 }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:var(--qa1)!important; color:var(--qa1f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:var(--qa2)!important; color:var(--qa2f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:var(--qa3)!important; color:var(--qa3f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:var(--qa4)!important; color:var(--qa4f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:var(--qa5)!important; color:var(--qa5f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:var(--qa6)!important; color:var(--qa6f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:var(--qa7)!important; color:var(--qa7f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:var(--qa8)!important; color:var(--qa8f)!important; border:none!important; }
 
-/* ─── METRICS ─── */
-[data-testid="stMetric"] {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-sm) !important;
-    padding: 10px 14px !important;
-}
-[data-testid="stMetricLabel"] {
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.72rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.07em !important;
-    text-transform: uppercase !important;
-    color: var(--text-muted) !important;
-}
-[data-testid="stMetricValue"] {
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    color: var(--text-primary) !important;
-}
-
-/* ─── DIVIDER ─── */
-hr {
-    border-color: var(--border) !important;
-    margin: 0.75rem 0 !important;
-}
-
-/* ─── PAGE TITLE (h1) for forms ─── */
-h1 {
-    font-family: 'DM Serif Display', serif !important;
-    font-weight: 400 !important;
-    color: var(--text-primary) !important;
-    letter-spacing: -0.02em !important;
-}
-
-/* ─── DOWNLOAD BUTTON ─── */
+/* ── DOWNLOAD BUTTON ── */
 [data-testid="stDownloadButton"] button {
-    background: var(--accent-soft) !important;
-    color: var(--accent) !important;
+    background: var(--accent-soft) !important; color: var(--accent) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-sm) !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.82rem !important;
-    font-weight: 600 !important;
-    transition: background var(--transition) !important;
+    font-size: 0.8rem !important; font-weight: 600 !important;
 }
 [data-testid="stDownloadButton"] button:hover {
-    background: var(--accent) !important;
-    color: #fff !important;
+    background: var(--accent) !important; color: #fff !important;
 }
 
-/* ─── CHAT HISTORY SCROLL ─── */
-.chat-scroll {
-    max-height: 58vh;
-    overflow-y: auto;
-    padding-right: 4px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+/* ── RECENT SNIPPETS ── */
+.recent-item {
+    font-size: 0.74rem; color: var(--txt3); padding: 5px 0;
+    border-bottom: 1px solid var(--border); line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ─── FORM INPUTS ─── */
+/* ── FORM INPUTS ── */
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea {
     font-family: 'DM Sans', sans-serif !important;
     border-radius: var(--radius-sm) !important;
     border: 1px solid var(--border) !important;
     background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
+    color: var(--txt) !important;
 }
-
-/* remove default streamlit padding on columns */
-[data-testid="column"] {
-    padding: 0 0.4rem !important;
+h1 {
+    font-family: 'DM Serif Display', serif !important;
+    font-weight: 400 !important; color: var(--txt) !important;
 }
-[data-testid="column"]:first-child { padding-left: 0 !important; }
-[data-testid="column"]:last-child  { padding-right: 0 !important; }
+hr { border-color: var(--border) !important; margin: 0.6rem 0 !important; }
 
+/* hide streamlit default menu clutter in columns */
+[data-testid="stToolbar"] { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1064,38 +925,30 @@ elif st.session_state.active_project_id and st.session_state.agent:
     agent = st.session_state.agent
     graph = st.session_state.graph
 
-    # ── 3-column layout: center is dominant ──
-    left_col, mid_col, right_col = st.columns([1, 2.8, 1.1])
+    # columns: left info | center chat | right actions
+    left_col, mid_col, right_col = st.columns([0.95, 2.6, 1.05])
 
     # ════════════════════════════
-    # LEFT — project info + export
+    # LEFT — compact project info + export + recents
     # ════════════════════════════
     with left_col:
-        # Project title card
+        topic_short = meta['topic'][:34] + ('…' if len(meta['topic']) > 34 else '')
+        docs_badge  = '✅ Docs attached' if meta.get('has_docs') else '📄 No docs'
         st.markdown(
             f"""
-            <div class="project-banner">
-                <h2>🔬 {meta['project_name']}</h2>
-                <div class="info-pills">
-                    <div class="info-pill">
-                        <span class="pill-label">Topic</span>
-                        {meta['topic'][:28] + ('…' if len(meta['topic']) > 28 else '')}
-                    </div>
-                    <div class="info-pill">
-                        <span class="pill-label">Timeline</span>
-                        {meta['timeline']}
-                    </div>
-                    <div class="info-pill">
-                        {'✅ Docs' if meta.get('has_docs') else '📄 No docs'}
-                    </div>
-                </div>
+            <div class="proj-header">
+                <p class="proj-header-title">🔬 {meta['project_name']}</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;">
+                <span class="proj-pill"><b>Topic</b>{topic_short}</span>
+                <span class="proj-pill"><b>Timeline</b>{meta['timeline']}</span>
+                <span class="proj-pill">{docs_badge}</span>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        # Export
-        st.markdown('<div class="sidebar-section-label" style="margin-top:1rem;">Backup</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sb-label">Export</div>', unsafe_allow_html=True)
         export_data = export_project(pid)
         st.download_button(
             label="📤 Export Project",
@@ -1105,48 +958,41 @@ elif st.session_state.active_project_id and st.session_state.agent:
             use_container_width=True
         )
 
-        # Chat history summary (last few turns)
         messages_all = load_chat_history(pid)
         if messages_all:
-            st.markdown('<div class="sidebar-section-label" style="margin-top:1rem;">Recent</div>', unsafe_allow_html=True)
-            for msg in messages_all[-4:]:
+            st.markdown('<div class="sb-label" style="margin-top:1rem;">Recent</div>', unsafe_allow_html=True)
+            for msg in messages_all[-5:]:
                 icon = "🧑" if msg["role"] == "user" else "🤖"
-                snippet = msg["content"][:60].replace("\n", " ") + ("…" if len(msg["content"]) > 60 else "")
-                st.markdown(
-                    f'<div style="font-size:0.76rem;color:var(--text-muted);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.4;">'
-                    f'{icon} {snippet}</div>',
-                    unsafe_allow_html=True
-                )
+                snippet = msg["content"][:55].replace("\n", " ") + "…"
+                st.markdown(f'<div class="recent-item">{icon} {snippet}</div>', unsafe_allow_html=True)
 
     # ════════════════════════════
-    # CENTER — chat
+    # CENTER — scrollable chat
     # ════════════════════════════
     with mid_col:
-        st.markdown('<div class="section-header">Research Chat</div>', unsafe_allow_html=True)
-
+        st.markdown('<div class="sec-label">Research Chat</div>', unsafe_allow_html=True)
         messages = load_chat_history(pid)
         for msg in messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
     # ════════════════════════════
-    # RIGHT — quick actions (no "Studio" branding)
+    # RIGHT — sticky quick actions
     # ════════════════════════════
     with right_col:
-        st.markdown('<div class="qa-header">Quick Actions</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sec-label">Quick Actions</div>', unsafe_allow_html=True)
         st.markdown('<div class="studio-wrap">', unsafe_allow_html=True)
 
         STUDIO = [
-            ("📅\nRoadmap",       "roadmap"),
-            ("🔍\nResearch Gap",  "gap"),
-            ("📚\nLearning",      "learning"),
-            ("🧠\nMethodology",   "methodology"),
-            ("📄\nPaper Intel",   "paper"),
-            ("🌐\nDiscovery",     "discovery"),
-            ("🎓\nMentor",        "mentor"),
-            ("❓\nQuiz",          "quiz"),
+            ("📅\nRoadmap",      "roadmap"),
+            ("🔍\nResearch Gap", "gap"),
+            ("📚\nLearning",     "learning"),
+            ("🧠\nMethodology",  "methodology"),
+            ("📄\nPaper Intel",  "paper"),
+            ("🌐\nDiscovery",    "discovery"),
+            ("🎓\nMentor",       "mentor"),
+            ("❓\nQuiz",         "quiz"),
         ]
-
         for i in range(0, len(STUDIO), 2):
             c1, c2 = st.columns(2)
             for col, (label, key) in zip([c1, c2], STUDIO[i:i+2]):
