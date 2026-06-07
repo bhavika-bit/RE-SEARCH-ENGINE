@@ -258,7 +258,16 @@ Generate:
 3. Learning sources
 4. Applications of the concept
 5. Suggestions to study
+6.Generate learning resources.
 
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 Be detailed and practical.
 """
         return self.llm.invoke(prompt).content
@@ -343,6 +352,16 @@ Generate:
 6. Conferences and journals to follow
 7. Useful resources and repositories
 8. Future directions in the field
+9.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 
 Be detailed and practical.
 """
@@ -366,6 +385,16 @@ Generate:
 7. Questions a reviewer may ask
 8. Suggestions for improvement
 9. Advice for successful completion
+10.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 
 Be detailed and practical.
 """
@@ -383,6 +412,16 @@ Generate:
 1. Project summary
 2. Project scope
 4. Idea feasibility
+5.Generate learning resources.
+
+Prefer:
+- Official documentation
+- Official GitHub repositories
+- ArXiv papers
+- Hugging Face model pages
+- Kaggle datasets
+
+Only provide links if reasonably confident they exist.
 Be detailed and practical.
 """
         return self.llm.invoke(prompt).content
