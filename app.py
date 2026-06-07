@@ -476,283 +476,189 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap');
 
-:root { --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --t:0.16s ease; }
+:root { --r8:8px; --r12:12px; --r16:16px; --t:0.15s ease; }
 
-/* ── LIGHT ── */
+/* ── LIGHT — soft lavender pastels ── */
 [data-theme="light"], .stApp[data-theme="light"] {
-    --bg-app:#f4f2fb; --bg-sb:#edeaf8; --bg-card:#ffffff;
-    --bg-hover:#ede9fe; --border:#ddd6fe; --accent:#6d28d9;
-    --accent-soft:#ede9fe; --txt:#1e1b4b; --txt2:#5b5488; --txt3:#9d96cc;
-    --qa1:#fce7f3; --qa1f:#831843; --qa2:#fef3c7; --qa2f:#78350f;
-    --qa3:#d1fae5; --qa3f:#064e3b; --qa4:#dbeafe; --qa4f:#1e3a5f;
-    --qa5:#ede9fe; --qa5f:#3b0764; --qa6:#cffafe; --qa6f:#0c4a6e;
-    --qa7:#fef9c3; --qa7f:#713f12; --qa8:#fce7f3; --qa8f:#500724;
+    --bg:#f4f2fb; --sb:#edeaf8; --card:#fff; --hover:#ede9fe;
+    --bdr:#ddd6fe; --acc:#6d28d9; --accs:#ede9fe;
+    --t1:#1e1b4b; --t2:#5b5488; --t3:#9d96cc;
+    --qa1:#fce7f3; --qa1f:#831843;
+    --qa2:#fef3c7; --qa2f:#78350f;
+    --qa3:#d1fae5; --qa3f:#064e3b;
+    --qa4:#dbeafe; --qa4f:#1e3a5f;
+    --qa5:#ede9fe; --qa5f:#3b0764;
+    --qa6:#cffafe; --qa6f:#0c4a6e;
+    --qa7:#fef9c3; --qa7f:#713f12;
+    --qa8:#fce7f3; --qa8f:#500724;
 }
-/* ── DARK ── */
+/* ── DARK — deep navy, vibrant actions ── */
 [data-theme="dark"], .stApp[data-theme="dark"] {
-    --bg-app:#0d0f17; --bg-sb:#11131e; --bg-card:#181b29;
-    --bg-hover:#1f2235; --border:#2a2d45; --accent:#818cf8;
-    --accent-soft:#1e2040; --txt:#e8e6ff; --txt2:#9d99cc; --txt3:#5c5888;
-    --qa1:#ff1a6b; --qa1f:#fff; --qa2:#ff6d00; --qa2f:#fff;
-    --qa3:#00c853; --qa3f:#001a09; --qa4:#2979ff; --qa4f:#fff;
-    --qa5:#9c27b0; --qa5f:#fff; --qa6:#00bcd4; --qa6f:#001a1f;
-    --qa7:#ffd600; --qa7f:#1a1400; --qa8:#e91e63; --qa8f:#fff;
+    --bg:#0d0f17; --sb:#11131e; --card:#181b29; --hover:#1f2235;
+    --bdr:#2a2d45; --acc:#818cf8; --accs:#1e2040;
+    --t1:#e8e6ff; --t2:#9d99cc; --t3:#5c5888;
+    --qa1:#ff1a6b; --qa1f:#fff;
+    --qa2:#ff6d00; --qa2f:#fff;
+    --qa3:#00c853; --qa3f:#001a09;
+    --qa4:#2979ff; --qa4f:#fff;
+    --qa5:#9c27b0; --qa5f:#fff;
+    --qa6:#00bcd4; --qa6f:#001a1f;
+    --qa7:#ffd600; --qa7f:#1a1400;
+    --qa8:#e91e63; --qa8f:#fff;
 }
 
-/* ── APP SHELL: full height, no overflow ── */
-html, body, .stApp { height: 100vh; overflow: hidden !important; }
-.stApp { background: var(--bg-app) !important; font-family: 'DM Sans', sans-serif; }
+/* ── BASE ── */
+.stApp { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
 
-/* kill default streamlit top padding */
-.block-container {
-    padding: 0 !important;
-    max-width: 100% !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-}
+/* remove streamlit's default page padding so we control all spacing */
+.block-container { padding: 1rem 1rem 5rem 1rem !important; max-width: 100% !important; }
 
 /* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background: var(--bg-sb) !important;
-    border-right: 1px solid var(--border) !important;
-    height: 100vh !important;
-    overflow-y: auto !important;
+    background: var(--sb) !important;
+    border-right: 1px solid var(--bdr) !important;
 }
 [data-testid="stSidebar"] > div:first-child { padding-top: 1.25rem; }
 
-.sb-brand {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.15rem;
-    color: var(--accent);
-    display: flex; align-items: center; gap: 7px;
-    padding-bottom: 0.75rem;
-}
-.sb-label {
-    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--txt3);
-    margin: 1rem 0 0.4rem 0;
-}
-
-/* sidebar new project button */
+/* sidebar primary button */
 [data-testid="stSidebar"] [data-testid="stBaseButton-primary"] button {
-    background: var(--accent) !important; color: #fff !important;
-    border: none !important; border-radius: var(--radius-sm) !important;
+    background: var(--acc) !important; color: #fff !important;
+    border: none !important; border-radius: var(--r8) !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.85rem !important; font-weight: 600 !important;
+    font-weight: 600 !important; font-size: 0.875rem !important;
 }
-/* sidebar project list buttons */
+/* sidebar project buttons */
 [data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button {
-    background: transparent !important; color: var(--txt2) !important;
-    border: 1px solid transparent !important;
-    border-radius: var(--radius-sm) !important;
+    background: transparent !important; color: var(--t2) !important;
+    border: 1px solid transparent !important; border-radius: var(--r8) !important;
     font-family: 'DM Sans', sans-serif !important;
     font-size: 0.82rem !important; font-weight: 400 !important;
     text-align: left !important; padding: 8px 10px !important;
     transition: all var(--t) !important;
 }
 [data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] button:hover {
-    background: var(--bg-hover) !important; color: var(--txt) !important;
-    border-color: var(--border) !important;
+    background: var(--hover) !important; color: var(--t1) !important;
+    border-color: var(--bdr) !important;
 }
 
-/* ── MAIN 3-COLUMN WRAPPER ── */
-/* The columns row must fill viewport height minus nothing (we removed all padding) */
-[data-testid="stHorizontalBlock"] {
-    height: calc(100vh - 0px) !important;
-    align-items: stretch !important;
-    gap: 0 !important;
+/* ── SECTION MICRO-LABELS ── */
+.lbl {
+    font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--t3);
+    margin: 0 0 0.5rem 0; display: block;
 }
 
-/* Each column fills full height */
-[data-testid="column"] {
-    height: 100vh !important;
-    overflow: hidden !important;
-    padding: 0 !important;
+/* ── PROJECT TITLE BLOCK (top of center col) ── */
+.proj-title-block {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bdr);
 }
-
-/* ── LEFT COL: scrollable ── */
-[data-testid="column"]:nth-child(1) {
-    overflow-y: auto !important;
-    border-right: 1px solid var(--border);
-    padding: 1.25rem 1rem !important;
-    background: var(--bg-app);
-}
-
-/* ── CENTER COL: scrollable chat ── */
-[data-testid="column"]:nth-child(2) {
-    overflow-y: auto !important;
-    padding: 1.25rem 1.25rem 6rem 1.25rem !important;
-    background: var(--bg-app);
-}
-
-/* ── RIGHT COL: fixed, no scroll ── */
-[data-testid="column"]:nth-child(3) {
-    overflow: hidden !important;
-    border-left: 1px solid var(--border);
-    padding: 1.25rem 0.85rem !important;
-    background: var(--bg-card);
-    position: sticky !important;
-    top: 0 !important;
-}
-
-/* ── PROJECT HEADER (compact horizontal strip) ── */
-.proj-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-}
-.proj-header-title {
+.proj-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 1.1rem;
+    font-size: 1.55rem;
     font-weight: 400;
-    color: var(--txt);
-    margin: 0;
+    color: var(--t1);
+    margin: 0 0 0.6rem 0;
     line-height: 1.25;
-    flex: 1;
-    min-width: 120px;
+    letter-spacing: -0.01em;
 }
-.proj-pill {
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 2px 10px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--txt2);
-    white-space: nowrap;
+.proj-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
 }
-.proj-pill b { color: var(--txt3); font-weight: 400; margin-right: 3px; }
-
-/* ── SECTION LABELS ── */
-.sec-label {
-    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em;
-    text-transform: uppercase; color: var(--txt3); margin: 0 0 0.6rem 0;
+.pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accs); border: 1px solid var(--bdr);
+    border-radius: 100px; padding: 3px 11px;
+    font-size: 0.71rem; font-weight: 500; color: var(--t2);
+    font-family: 'DM Sans', sans-serif;
 }
+.pill-key { color: var(--t3); font-weight: 400; font-size: 0.68rem; }
 
 /* ── CHAT MESSAGES ── */
 [data-testid="stChatMessage"] {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-md) !important;
+    background: var(--card) !important;
+    border: 1px solid var(--bdr) !important;
+    border-radius: var(--r12) !important;
     margin-bottom: 0.5rem !important;
     font-family: 'DM Sans', sans-serif !important;
 }
 [data-testid="stChatInputContainer"] {
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-md) !important;
-    background: var(--bg-card) !important;
+    border: 1px solid var(--bdr) !important;
+    border-radius: var(--r12) !important;
+    background: var(--card) !important;
+}
+
+/* ── RIGHT COL: make it visually sticky ── */
+/* Streamlit columns don't support position:sticky natively,
+   but we can set overflow:hidden and a fixed height so content doesn't scroll */
+.qa-panel {
+    position: sticky;
+    top: 1rem;
 }
 
 /* ── QUICK ACTION BUTTONS ── */
 .studio-wrap [data-testid="stVerticalBlock"] > div button {
-    border-radius: var(--radius-md) !important;
-    min-height: 68px !important;
+    border-radius: var(--r12) !important;
+    min-height: 66px !important;
     font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.76rem !important; font-weight: 600 !important;
+    font-size: 0.75rem !important; font-weight: 600 !important;
     border: none !important; white-space: pre-wrap !important;
-    line-height: 1.35 !important; width: 100% !important;
+    line-height: 1.3 !important; width: 100% !important;
     transition: transform var(--t), filter var(--t) !important;
 }
 .studio-wrap [data-testid="stVerticalBlock"] > div button:hover {
     transform: translateY(-2px) !important;
     filter: brightness(1.08) !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.18) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
 }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button { background:var(--qa1)!important; color:var(--qa1f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button { background:var(--qa2)!important; color:var(--qa2f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button { background:var(--qa3)!important; color:var(--qa3f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button { background:var(--qa4)!important; color:var(--qa4f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button { background:var(--qa5)!important; color:var(--qa5f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button { background:var(--qa6)!important; color:var(--qa6f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button { background:var(--qa7)!important; color:var(--qa7f)!important; border:none!important; }
-.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button { background:var(--qa8)!important; color:var(--qa8f)!important; border:none!important; }
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(1) button{background:var(--qa1)!important;color:var(--qa1f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(2) button{background:var(--qa2)!important;color:var(--qa2f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(3) button{background:var(--qa3)!important;color:var(--qa3f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(4) button{background:var(--qa4)!important;color:var(--qa4f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(5) button{background:var(--qa5)!important;color:var(--qa5f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(6) button{background:var(--qa6)!important;color:var(--qa6f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(7) button{background:var(--qa7)!important;color:var(--qa7f)!important;border:none!important;}
+.studio-wrap [data-testid="stVerticalBlock"] > div:nth-child(8) button{background:var(--qa8)!important;color:var(--qa8f)!important;border:none!important;}
 
 /* ── DOWNLOAD BUTTON ── */
 [data-testid="stDownloadButton"] button {
-    background: var(--accent-soft) !important; color: var(--accent) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-sm) !important;
+    background: var(--accs) !important; color: var(--acc) !important;
+    border: 1px solid var(--bdr) !important; border-radius: var(--r8) !important;
     font-family: 'DM Sans', sans-serif !important;
     font-size: 0.8rem !important; font-weight: 600 !important;
 }
 [data-testid="stDownloadButton"] button:hover {
-    background: var(--accent) !important; color: #fff !important;
+    background: var(--acc) !important; color: #fff !important;
 }
 
-/* ── RECENT SNIPPETS ── */
+/* ── LEFT COL BORDER ── */
+[data-testid="column"]:first-child {
+    border-right: 1px solid var(--bdr);
+    padding-right: 1rem !important;
+}
+/* ── RIGHT COL BORDER ── */
+[data-testid="column"]:last-child {
+    border-left: 1px solid var(--bdr);
+    padding-left: 1rem !important;
+    background: var(--card);
+}
+
+/* ── RECENT ITEMS ── */
 .recent-item {
-    font-size: 0.74rem; color: var(--txt3); padding: 5px 0;
-    border-bottom: 1px solid var(--border); line-height: 1.4;
+    font-size: 0.73rem; color: var(--t3); padding: 5px 0;
+    border-bottom: 1px solid var(--bdr); line-height: 1.4;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ── FORM INPUTS ── */
-[data-testid="stTextInput"] input,
-[data-testid="stTextArea"] textarea {
+/* ── FORM / HEADINGS ── */
+h1 { font-family: 'DM Serif Display', serif !important; font-weight: 400 !important; color: var(--t1) !important; }
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea {
     font-family: 'DM Sans', sans-serif !important;
-    border-radius: var(--radius-sm) !important;
-    border: 1px solid var(--border) !important;
-    background: var(--bg-card) !important;
-    color: var(--txt) !important;
+    border-radius: var(--r8) !important; border: 1px solid var(--bdr) !important;
+    background: var(--card) !important; color: var(--t1) !important;
 }
-h1 {
-    font-family: 'DM Serif Display', serif !important;
-    font-weight: 400 !important; color: var(--txt) !important;
-}
-hr { border-color: var(--border) !important; margin: 0.6rem 0 !important; }
-
-/* hide streamlit default menu clutter in columns */
-[data-testid="stToolbar"] { display: none !important; }
-
-/* ── PROJECT TOPBAR — spans full main area width ── */
-.proj-topbar {
-    padding: 0.9rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-card);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-.proj-topbar-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.05rem;
-    font-weight: 400;
-    color: var(--txt);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-.proj-topbar-pills {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-.proj-pill {
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 2px 10px;
-    font-size: 0.71rem;
-    font-weight: 500;
-    color: var(--txt2);
-    white-space: nowrap;
-    font-family: 'DM Sans', sans-serif;
-}
-.proj-pill b { color: var(--txt3); font-weight: 500; }
-
-/* Topbar lives ABOVE the 3-col block — adjust col heights */
-/* The topbar is ~52px; columns fill the rest */
-[data-testid="stHorizontalBlock"] {
-    height: calc(100vh - 52px) !important;
-}
-[data-testid="column"] {
-    height: calc(100vh - 52px) !important;
-}
+hr { border-color: var(--bdr) !important; margin: 0.6rem 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -971,31 +877,11 @@ elif st.session_state.active_project_id and st.session_state.agent:
     agent = st.session_state.agent
     graph = st.session_state.graph
 
-    # ── PROJECT TITLE BAR — full width, top of main area ──
-    topic_short = meta['topic'][:50] + ('…' if len(meta['topic']) > 50 else '')
-    docs_badge  = '✅ Docs' if meta.get('has_docs') else '📄 No docs'
-    st.markdown(
-        f"""
-        <div class="proj-topbar">
-            <div class="proj-topbar-title">🔬 {meta['project_name']}</div>
-            <div class="proj-topbar-pills">
-                <span class="proj-pill"><b>Topic&nbsp;</b>{topic_short}</span>
-                <span class="proj-pill"><b>Timeline&nbsp;</b>{meta['timeline']}</span>
-                <span class="proj-pill">{docs_badge}</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    left_col, mid_col, right_col = st.columns([0.8, 2.6, 1.1])
 
-    # ── 3-COLUMN BODY ──
-    left_col, mid_col, right_col = st.columns([0.85, 2.7, 1.05])
-
-    # ════════════════════════════
-    # LEFT — export + recents only
-    # ════════════════════════════
+    # ── LEFT: export + recent history ──
     with left_col:
-        st.markdown('<div class="sb-label">Export</div>', unsafe_allow_html=True)
+        st.markdown('<span class="lbl">Export</span>', unsafe_allow_html=True)
         export_data = export_project(pid)
         st.download_button(
             label="📤 Export",
@@ -1004,31 +890,41 @@ elif st.session_state.active_project_id and st.session_state.agent:
             mime="application/json",
             use_container_width=True
         )
-
         messages_all = load_chat_history(pid)
         if messages_all:
-            st.markdown('<div class="sb-label" style="margin-top:1.2rem;">Recent</div>', unsafe_allow_html=True)
+            st.markdown('<span class="lbl" style="margin-top:1.2rem;display:block;">Recent</span>', unsafe_allow_html=True)
             for msg in messages_all[-6:]:
                 icon = "🧑" if msg["role"] == "user" else "🤖"
-                snippet = msg["content"][:52].replace("\n", " ") + "…"
+                snippet = msg["content"][:50].replace("\n", " ") + "…"
                 st.markdown(f'<div class="recent-item">{icon} {snippet}</div>', unsafe_allow_html=True)
 
-    # ════════════════════════════
-    # CENTER — scrollable chat
-    # ════════════════════════════
+    # ── CENTER: title + pills + chat ──
     with mid_col:
+        topic_s = meta["topic"][:60] + ("…" if len(meta["topic"]) > 60 else "")
+        docs_s  = "✅ Docs" if meta.get("has_docs") else "📄 No docs"
+        st.markdown(
+            f"""
+            <div class="proj-title-block">
+                <div class="proj-title">🔬 {meta['project_name']}</div>
+                <div class="proj-pills">
+                    <span class="pill"><span class="pill-key">Topic</span>{topic_s}</span>
+                    <span class="pill"><span class="pill-key">Timeline</span>{meta['timeline']}</span>
+                    <span class="pill">{docs_s}</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         messages = load_chat_history(pid)
         for msg in messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-    # ════════════════════════════
-    # RIGHT — fixed quick actions
-    # ════════════════════════════
+    # ── RIGHT: quick actions (sticky via .qa-panel wrapper) ──
     with right_col:
-        st.markdown('<div class="sec-label">Quick Actions</div>', unsafe_allow_html=True)
+        st.markdown('<div class="qa-panel">', unsafe_allow_html=True)
+        st.markdown('<span class="lbl">Quick Actions</span>', unsafe_allow_html=True)
         st.markdown('<div class="studio-wrap">', unsafe_allow_html=True)
-
         STUDIO = [
             ("📅\nRoadmap",      "roadmap"),
             ("🔍\nResearch Gap", "gap"),
@@ -1046,8 +942,7 @@ elif st.session_state.active_project_id and st.session_state.agent:
                     if st.button(label, key=f"qa_{key}", use_container_width=True):
                         st.session_state.triggered_feature = key
                         st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
     # ── CHAT INPUT ──
     prompt = st.chat_input("Ask your research mentor anything...")
