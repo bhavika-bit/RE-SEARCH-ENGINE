@@ -1040,4 +1040,107 @@ elif st.session_state.active_project_id and st.session_state.agent:
         with chat_container:
             for msg in messages:
                 if msg["role"] == "user":
-                    st.markdown(f'<div class="chat-message-user">🗣
+                    st.markdown(f'<div class="chat-message-user">🗣️ {msg["content"]}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="chat-message-assistant">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
+        
+        # Chat Input
+        prompt = st.chat_input("Ask your research mentor anything...")
+        if prompt:
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            messages = append_message(pid, "user", prompt)
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    response = agent.chat(prompt, messages)
+                st.markdown(response)
+            append_message(pid, "assistant", response)
+            st.rerun()
+    
+    # ==================== RIGHT PANEL ====================
+    with right_panel:
+        st.markdown("""
+        <div class="quick-actions-panel">
+            <h3 style="margin-top:0;">⚡ Quick Actions</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        actions = [
+            ("📅 Roadmap", "roadmap"),
+            ("🔍 Research Gap", "gap"),
+            ("📚 Learning Path", "learning"),
+            ("🧠 Methodology", "methodology"),
+            ("📄 Paper Intelligence", "paper"),
+            ("🌐 Research Discovery", "discovery"),
+            ("🎓 Research Mentor", "mentor"),
+            ("❓ Interactive Quiz", "quiz"),
+            ("🃏 Interactive Flashcards", "flashcards"),
+        ]
+        
+        for label, key in actions:
+            if st.button(label, key=f"action_{key}", use_container_width=True):
+                if key == "quiz":
+                    with st.spinner("Generating quiz..."):
+                        quiz_json = agent.quizgenerator_json()
+                        st.session_state.quiz_data = quiz_json
+                        st.session_state.quiz_index = 0
+                        st.session_state.quiz_score = 0
+                        st.session_state.quiz_complete = False
+                        st.session_state.quiz_answer_submitted = False
+                        st.session_state.quiz_selected_answer = None
+                    st.rerun()
+                elif key == "flashcards":
+                    with st.spinner("Generating flashcards..."):
+                        flashcards_json = agent.flashcards_json()
+                        st.session_state.flashcards = flashcards_json
+                        st.session_state.flashcard_index = 0
+                        st.session_state.flashcard_showing_back = False
+                    st.rerun()
+                else:
+                    with st.spinner(f"Generating {label}..."):
+                        state = {}
+                        if key == "roadmap":
+                            state = st.session_state.graph.roadmap_node(state)
+                        elif key == "gap":
+                            state = st.session_state.graph.researchgap_node(state)
+                        elif key == "learning":
+                            state = st.session_state.graph.learning_node(state)
+                        elif key == "methodology":
+                            state = st.session_state.graph.methodology_node(state)
+                        elif key == "paper":
+                            state = st.session_state.graph.paperintelligence_node(state)
+                        elif key == "discovery":
+                            state = st.session_state.graph.researchdiscovery_node(state)
+                        elif key == "mentor":
+                            state = st.session_state.graph.researchmentor_node(state)
+                        answer = state.get("answer", "")
+                    append_message(pid, "user", f"Generate: {label}")
+                    append_message(pid, "assistant", answer)
+                    st.rerun()
+        
+        # Quiz Display
+        if st.session_state.quiz_data and st.session_state.quiz_data.get("questions"):
+            st.markdown("---")
+            st.markdown("### ❓ Active Quiz")
+            render_quiz()
+        
+        # Flashcards Display
+        if st.session_state.flashcards and st.session_state.flashcards.get("flashcards"):
+            st.markdown("---")
+            st.markdown("### 🃏 Active Flashcards")
+            render_flashcards()
+
+# ==================== LANDING PAGE ====================
+else:
+    st.markdown("""
+    <div style="text-align:center; padding: 80px 40px;">
+        <h1>🔬 ResearchEngine</h1>
+        <p style="font-size:1.2rem; color:#888;">
+            Your AI-powered research mentor. Create a project to get started.
+        </p>
+        <br>
+        <p style="color:#555;">
+            ← Click <strong>➕ New Project</strong> in the left panel
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
