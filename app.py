@@ -530,66 +530,90 @@ def load_cached_faiss(project_id):
 def get_embeddings():
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# ==================== STICKY PANEL CSS ====================
-def apply_sticky_css():
+# ==================== CSS FOR STICKY LAYOUT ====================
+def apply_layout_css():
     st.markdown("""
     <style>
-        /* Make columns container use flex with proper alignment */
-        .stColumn {
-            position: relative;
+        /* Hide default Streamlit padding and margin */
+        .main .block-container {
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            max-width: 100%;
+            padding-left: 0rem;
+            padding-right: 0rem;
         }
         
-        /* Left panel sticky wrapper */
-        [data-testid="column"]:nth-of-type(1) {
-            position: sticky;
-            top: 0px;
+        /* Create a grid container for the three columns */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1.3fr 4.8fr 1.6fr;
+            gap: 0rem;
             height: 100vh;
-            overflow-y: auto;
-            padding-right: 10px;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
-        /* Right panel sticky wrapper */
-        [data-testid="column"]:nth-of-type(3) {
-            position: sticky;
-            top: 0px;
+        /* Left Panel - Sticky/Scrollable */
+        .left-panel {
+            background: transparent;
+            overflow-y: auto;
+            padding: 1rem 0.8rem;
             height: 100vh;
+            scrollbar-width: thin;
+        }
+        
+        /* Center Panel - Scrolling */
+        .center-panel {
+            background: transparent;
             overflow-y: auto;
-            padding-left: 10px;
+            padding: 1rem 1.2rem;
+            height: 100vh;
+            scrollbar-width: thin;
         }
         
-        /* Center panel - normal scrolling */
-        [data-testid="column"]:nth-of-type(2) {
-            overflow-y: visible;
-            height: auto;
+        /* Right Panel - Sticky/Scrollable */
+        .right-panel {
+            background: transparent;
+            overflow-y: auto;
+            padding: 1rem 0.8rem;
+            height: 100vh;
+            scrollbar-width: thin;
         }
         
-        /* Custom scrollbar for sticky panels */
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar {
+        /* Custom scrollbar styling */
+        .left-panel::-webkit-scrollbar,
+        .center-panel::-webkit-scrollbar,
+        .right-panel::-webkit-scrollbar {
             width: 6px;
         }
         
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
-            background: #1a1a2e;
-            border-radius: 3px;
+        .left-panel::-webkit-scrollbar-track,
+        .center-panel::-webkit-scrollbar-track,
+        .right-panel::-webkit-scrollbar-track {
+            background: transparent;
         }
         
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
-            background: #00FFFF;
-            border-radius: 3px;
+        /* Remove default Streamlit button margins */
+        .stButton button {
+            margin-bottom: 0.2rem;
         }
         
-        /* Ensure chat container doesn't interfere with sticky behavior */
-        .main > div {
-            flex-direction: row !important;
+        /* Better spacing for project cards */
+        .project-card {
+            margin-bottom: 8px;
+            cursor: pointer;
         }
         
-        /* Better chat message styling */
-        .chat-message-user, .chat-message-assistant {
-            word-wrap: break-word;
-            white-space: normal;
+        /* Chat input at bottom of center panel */
+        .chat-input-container {
+            position: sticky;
+            bottom: 0;
+            background: inherit;
+            padding-top: 10px;
+            margin-top: 20px;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -601,10 +625,15 @@ def apply_theme_css():
         st.markdown("""
         <style>
         /* Light Mode - Pastel Aesthetic */
-        .stApp {
+        body, .stApp, .dashboard-container {
             background: #FFF8FC;
         }
-        [data-testid="stAppViewContainer"] {
+        .left-panel, .right-panel {
+            background: #F5EFFF;
+            border-right: 1px solid #FFB7D5;
+            border-left: 1px solid #FFB7D5;
+        }
+        .center-panel {
             background: #FFF8FC;
         }
         .project-card {
@@ -684,24 +713,22 @@ def apply_theme_css():
         h1, h2, h3, p, span, label {
             color: #4A3A6E;
         }
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
-            background: #F5EFFF;
-        }
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
-            background: #C8A2FF;
-        }
         </style>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
         <style>
         /* Dark Mode - Cyber Neon Aesthetic */
-        .stApp {
+        body, .stApp, .dashboard-container {
             background: #0D1117;
         }
-        [data-testid="stAppViewContainer"] {
+        .left-panel, .right-panel {
+            background: #111827;
+            border-right: 1px solid #00FFFF;
+            border-left: 1px solid #00FFFF;
+            box-shadow: 0 0 5px rgba(0,255,255,0.1);
+        }
+        .center-panel {
             background: #0D1117;
         }
         .project-card {
@@ -782,14 +809,6 @@ def apply_theme_css():
         }
         h1, h2, h3, p, span, label {
             color: #E0E0E0;
-        }
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-track,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        [data-testid="column"]:nth-of-type(1)::-webkit-scrollbar-thumb,
-        [data-testid="column"]:nth-of-type(3)::-webkit-scrollbar-thumb {
-            background: #00FFFF;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -953,7 +972,7 @@ st.set_page_config(
 )
 
 # Apply CSS
-apply_sticky_css()
+apply_layout_css()
 apply_theme_css()
 
 # ==================== THEME TOGGLE ====================
@@ -964,11 +983,13 @@ with col_theme:
         st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
         st.rerun()
 
-# ==================== THREE PANEL LAYOUT ====================
-left_panel, center_panel, right_panel = st.columns([1.3, 4.8, 1.6])
+# ==================== THREE PANEL LAYOUT USING HTML GRID ====================
+# Start the dashboard container
+st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
 
-# ==================== LEFT PANEL (STICKY) ====================
-with left_panel:
+# LEFT PANEL
+st.markdown('<div class="left-panel">', unsafe_allow_html=True)
+with st.container():
     st.markdown("## 🔬 ResearchEngine")
     st.markdown("---")
     
@@ -1023,10 +1044,12 @@ with left_panel:
                 st.session_state.show_new_project_form = False
                 load_project(pid)
                 st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== NEW PROJECT FORM ====================
 if st.session_state.show_new_project_form:
-    with center_panel:
+    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
+    with st.container():
         st.title("✨ Create New Project")
         with st.form("new_project_form"):
             project_name = st.text_input("Project Name", placeholder="e.g. Crime Hotspot Analysis")
@@ -1088,6 +1111,9 @@ if st.session_state.show_new_project_form:
                 
                 st.success("Project created!")
                 st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="right-panel"></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== CENTER PANEL (SCROLLABLE) ====================
 elif st.session_state.active_project_id and st.session_state.agent:
@@ -1095,7 +1121,9 @@ elif st.session_state.active_project_id and st.session_state.agent:
     meta = st.session_state.active_meta
     agent = st.session_state.agent
     
-    with center_panel:
+    # CENTER PANEL
+    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
+    with st.container():
         # Metadata Card (non-sticky, scrolls with chat)
         st.markdown(f"""
         <div class="metadata-card">
@@ -1109,19 +1137,16 @@ elif st.session_state.active_project_id and st.session_state.agent:
         
         st.markdown("### 💬 Research Chat")
         
-        # Chat History - scrollable container
+        # Chat History
         messages = load_chat_history(pid)
         
-        # Use a container for chat messages that will scroll naturally
-        chat_container = st.container()
-        with chat_container:
-            for msg in messages:
-                if msg["role"] == "user":
-                    st.markdown(f'<div class="chat-message-user">🗣️ {msg["content"]}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="chat-message-assistant">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
+        for msg in messages:
+            if msg["role"] == "user":
+                st.markdown(f'<div class="chat-message-user">🗣️ {msg["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-message-assistant">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Chat Input - fixed at bottom of center panel
+        # Chat Input
         prompt = st.chat_input("Ask your research mentor anything...")
         if prompt:
             with st.chat_message("user"):
@@ -1133,9 +1158,11 @@ elif st.session_state.active_project_id and st.session_state.agent:
                 st.markdown(response)
             append_message(pid, "assistant", response)
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # ==================== RIGHT PANEL (STICKY) ====================
-    with right_panel:
+    st.markdown('<div class="right-panel">', unsafe_allow_html=True)
+    with st.container():
         st.markdown("""
         <div class="quick-actions-panel">
             <h3 style="margin-top:0;">⚡ Quick Actions</h3>
@@ -1206,9 +1233,14 @@ elif st.session_state.active_project_id and st.session_state.agent:
             st.markdown("---")
             st.markdown("### 🃏 Active Flashcards")
             render_flashcards()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Close the dashboard container
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== LANDING PAGE ====================
 else:
+    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center; padding: 80px 40px;">
         <h1>🔬 ResearchEngine</h1>
@@ -1221,3 +1253,6 @@ else:
         </p>
     </div>
     """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="right-panel"></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
