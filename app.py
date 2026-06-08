@@ -514,7 +514,7 @@ class Graph:
 
 @st.cache_resource
 def get_llm():
-    return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.6)
+    return ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.6)
 
 @st.cache_resource
 def load_cached_faiss(project_id):
