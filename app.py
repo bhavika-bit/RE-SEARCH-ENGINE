@@ -1031,14 +1031,30 @@ with st.sidebar:
     st.markdown("### 📦 Import/Export")
     
     uploaded_project_file = st.file_uploader("Import Project", type=["json"], key="import_uploader")
-    if uploaded_project_file is not None:
-        try:
-            imported_project_id = import_project(uploaded_project_file)
-            st.success("✅ Project imported successfully!")
-            load_project(imported_project_id)
-            st.rerun()
-        except Exception as e:
-            st.error(f"Import failed: {str(e)}")
+    # Initialize the flag at the top with other session state defaults
+if "import_processed" not in st.session_state:
+    st.session_state.import_processed = False
+
+# Then replace the import block with:
+uploaded_project_file = st.file_uploader(
+    "📥 Import Project",
+    type=["json"],
+    key="import_uploader"
+)
+
+if uploaded_project_file is not None and not st.session_state.import_processed:
+    try:
+        imported_project_id = import_project(uploaded_project_file)
+        st.success("✅ Project imported successfully!")
+        load_project(imported_project_id)
+        st.session_state.import_processed = True
+        st.rerun()
+    except Exception as e:
+        st.error(f"Import failed: {str(e)}")
+
+# Reset the flag when no file is uploaded
+if uploaded_project_file is None:
+    st.session_state.import_processed = False
     
     if st.session_state.active_project_id:
         pid = st.session_state.active_project_id
