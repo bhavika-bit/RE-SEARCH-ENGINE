@@ -1029,8 +1029,6 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 📦 Import/Export")
-    
-    uploaded_project_file = st.file_uploader("Import Project", type=["json"], key="import_uploader")
     # Initialize the flag at the top with other session state defaults
 if "import_processed" not in st.session_state:
     st.session_state.import_processed = False
