@@ -1362,9 +1362,6 @@ elif st.session_state.active_project_id and st.session_state.agent:
     st.markdown("---")
     
     # Quick Actions
-# Replace your existing action buttons section with:
-
-# Replace your existing action buttons section with:
 
 st.markdown("## ⚡ Quick Actions")
 
@@ -1378,35 +1375,61 @@ actions = [
     ("🎓 Mentor", "mentor", "Get strict thesis supervisor review with assessment, concerns, and success probability"),
 ]
 
-# Create a 2x4 grid (2 rows, 4 columns)
-for row in range(2):
-    cols = st.columns(4)
-    for col in range(4):
-        action_idx = row * 4 + col
-        if action_idx < len(actions):
-            label, key, tooltip = actions[action_idx]
-            with cols[col]:
-                if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
-                    with st.spinner(f"Generating {label}..."):
-                        state = {}
-                        if key == "roadmap":
-                            state = graph.roadmap_node(state)
-                        elif key == "gap":
-                            state = graph.researchgap_node(state)
-                        elif key == "learning":
-                            state = graph.learning_node(state)
-                        elif key == "methodology":
-                            state = graph.methodology_node(state)
-                        elif key == "paper":
-                            state = graph.paperintelligence_node(state)
-                        elif key == "discovery":
-                            state = graph.researchdiscovery_node(state)
-                        elif key == "mentor":
-                            state = graph.researchmentor_node(state)
-                        answer = state.get("answer", "")
-                        append_message(pid, "user", f"Generate: {label}")
-                        append_message(pid, "assistant", answer)
-                        st.rerun()
+# Row 1: First 4 actions
+cols1 = st.columns(4)
+for i in range(4):
+    if i < len(actions):
+        label, key, tooltip = actions[i]
+        with cols1[i]:
+            if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
+                with st.spinner(f"Generating {label}..."):
+                    state = {}
+                    if key == "roadmap":
+                        state = graph.roadmap_node(state)
+                    elif key == "gap":
+                        state = graph.researchgap_node(state)
+                    elif key == "learning":
+                        state = graph.learning_node(state)
+                    elif key == "methodology":
+                        state = graph.methodology_node(state)
+                    elif key == "paper":
+                        state = graph.paperintelligence_node(state)
+                    elif key == "discovery":
+                        state = graph.researchdiscovery_node(state)
+                    elif key == "mentor":
+                        state = graph.researchmentor_node(state)
+                    answer = state.get("answer", "")
+                    append_message(pid, "user", f"Generate: {label}")
+                    append_message(pid, "assistant", answer)
+                    st.rerun()
+
+# Row 2: Remaining 3 actions
+cols2 = st.columns(4)  
+for i in range(4, len(actions)):
+    idx = i - 4
+    label, key, tooltip = actions[i]
+    with cols2[idx]:
+        if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
+            with st.spinner(f"Generating {label}..."):
+                state = {}
+                if key == "roadmap":
+                    state = graph.roadmap_node(state)
+                elif key == "gap":
+                    state = graph.researchgap_node(state)
+                elif key == "learning":
+                    state = graph.learning_node(state)
+                elif key == "methodology":
+                    state = graph.methodology_node(state)
+                elif key == "paper":
+                    state = graph.paperintelligence_node(state)
+                elif key == "discovery":
+                    state = graph.researchdiscovery_node(state)
+                elif key == "mentor":
+                    state = graph.researchmentor_node(state)
+                answer = state.get("answer", "")
+                append_message(pid, "user", f"Generate: {label}")
+                append_message(pid, "assistant", answer)
+                st.rerun()
     
     st.markdown("---")
     
