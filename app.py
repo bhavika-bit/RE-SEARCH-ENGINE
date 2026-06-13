@@ -566,6 +566,8 @@ if "flashcard_review" not in st.session_state:
     st.session_state.flashcard_review = set()
 if "quiz_mode" not in st.session_state:
     st.session_state.quiz_mode = None  # 'quiz' or 'flashcards'
+if "import_processed" not in st.session_state:
+    st.session_state.import_processed = False
 
 
 def load_project(project_id):
@@ -608,7 +610,6 @@ def render_quiz():
         st.balloons()
         st.success(f"🎉 Quiz Complete!\n\n**Score: {score}/{total} ({percentage:.0f}%)**")
         
-        # Show weak topics based on incorrect answers
         if st.session_state.weak_topics:
             st.markdown("### 📚 Topics to Review")
             for topic in st.session_state.weak_topics:
@@ -642,7 +643,6 @@ def render_quiz():
 
     q = questions[st.session_state.quiz_index]
     
-    # Progress bar
     progress = (st.session_state.quiz_index) / len(questions)
     st.progress(progress, text=f"Question {st.session_state.quiz_index + 1} of {len(questions)}")
     
@@ -665,7 +665,6 @@ def render_quiz():
                         st.success("✅ Correct! Great job!")
                     else:
                         st.error(f"❌ Incorrect. The correct answer is: {q['options'][correct_idx]}")
-                        # Track weak topic
                         topic = q.get('topic', 'General Concept')
                         if topic not in st.session_state.weak_topics:
                             st.session_state.weak_topics.append(topic)
@@ -691,7 +690,6 @@ def render_flashcards():
         st.warning("No flashcards available. Generate flashcards first.")
         return
     
-    # Filter out mastered cards if needed
     active_cards = [i for i in range(len(flashcards)) if i not in st.session_state.flashcard_mastered]
     
     if not active_cards:
@@ -703,7 +701,6 @@ def render_flashcards():
             st.rerun()
         return
     
-    # Adjust index if current card is mastered
     if st.session_state.flashcard_index in st.session_state.flashcard_mastered:
         st.session_state.flashcard_index = active_cards[0]
     
@@ -712,13 +709,11 @@ def render_flashcards():
     current_card_index = active_cards[current_pos]
     card = flashcards[current_card_index]
     
-    # Progress
     mastered_count = len(st.session_state.flashcard_mastered)
     st.progress(mastered_count / len(flashcards), text=f"Mastered: {mastered_count}/{len(flashcards)}")
     
     st.markdown(f"**Card {current_pos + 1} of {total}**")
     
-    # Flashcard display
     st.markdown("---")
     if not st.session_state.flashcard_showing_back:
         st.markdown(f"### 📇 {card['front']}")
@@ -735,7 +730,6 @@ def render_flashcards():
                 st.session_state.flashcard_mastered.add(current_card_index)
                 if current_card_index in st.session_state.flashcard_review:
                     st.session_state.flashcard_review.discard(current_card_index)
-                # Move to next card
                 remaining = [i for i in active_cards if i not in st.session_state.flashcard_mastered]
                 if remaining:
                     st.session_state.flashcard_index = remaining[0]
@@ -744,7 +738,6 @@ def render_flashcards():
         with col2:
             if st.button("🔄 Need Review", use_container_width=True):
                 st.session_state.flashcard_review.add(current_card_index)
-                # Move to next card
                 remaining = [i for i in active_cards if i not in st.session_state.flashcard_mastered]
                 if remaining:
                     next_idx = (current_pos + 1) % len(remaining) if len(remaining) > 1 else remaining[0]
@@ -758,7 +751,6 @@ def render_flashcards():
     
     st.markdown("---")
     
-    # Navigation
     col_prev, col_info, col_next = st.columns([1, 2, 1])
     with col_prev:
         if current_pos > 0:
@@ -775,7 +767,6 @@ def render_flashcards():
                 st.session_state.flashcard_showing_back = False
                 st.rerun()
     
-    # Review section
     if st.session_state.flashcard_review:
         st.markdown("---")
         st.markdown("### 🔄 Cards to Review")
@@ -801,8 +792,80 @@ st.set_page_config(
 def apply_theme():
     theme = st.session_state.theme
     
+    # Shared tooltip CSS injected for both themes
+    tooltip_css = """
+    <style>
+    /* ── Tooltip wrapper ── */
+    .action-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .action-info-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: default;
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        z-index: 10;
+        line-height: 1;
+        user-select: none;
+        transition: opacity 0.15s ease;
+    }
+
+    /* Tooltip bubble */
+    .action-tooltip {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 210px;
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-size: 12px;
+        line-height: 1.55;
+        z-index: 9999;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        transform: translateX(-50%) translateY(4px);
+        text-align: left;
+    }
+
+    /* Arrow */
+    .action-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+    }
+
+    /* Show on hover of the info btn */
+    .action-info-btn:hover + .action-tooltip,
+    .action-tooltip:hover {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    </style>
+    """
+    
     if theme == "light":
-        st.markdown("""
+        st.markdown(tooltip_css + """
         <style>
         /* Light Mode - Pastel Aesthetic */
         .stApp {
@@ -883,10 +946,30 @@ def apply_theme():
         .stAlert {
             border-radius: 12px;
         }
+
+        /* Light mode tooltip */
+        .action-info-btn {
+            background: #E8D5FF;
+            color: #6B4E9E;
+            border: 1.5px solid #C8A2FF;
+        }
+        .action-info-btn:hover {
+            background: #C8A2FF;
+            color: #fff;
+        }
+        .action-tooltip {
+            background: #FFFFFF;
+            color: #3A2A5E;
+            border: 1px solid #C8A2FF;
+            box-shadow: 0 6px 20px rgba(200,162,255,0.25);
+        }
+        .action-tooltip::after {
+            border-color: #C8A2FF transparent transparent transparent;
+        }
         </style>
         """, unsafe_allow_html=True)
     else:
-        st.markdown("""
+        st.markdown(tooltip_css + """
         <style>
         /* Dark Mode - Vibrant Cyber Neon */
         .stApp {
@@ -974,6 +1057,26 @@ def apply_theme():
             border-radius: 12px;
             border: 1px solid #00FFFF;
         }
+
+        /* Dark mode tooltip */
+        .action-info-btn {
+            background: #1E2340;
+            color: #00FFFF;
+            border: 1.5px solid #00FFFF;
+        }
+        .action-info-btn:hover {
+            background: #00FFFF;
+            color: #0D0F1A;
+        }
+        .action-tooltip {
+            background: #161A2D;
+            color: #E0E0E0;
+            border: 1px solid #00FFFF;
+            box-shadow: 0 0 20px rgba(0,255,255,0.2);
+        }
+        .action-tooltip::after {
+            border-color: #00FFFF transparent transparent transparent;
+        }
         </style>
         """, unsafe_allow_html=True)
 
@@ -984,7 +1087,6 @@ with st.sidebar:
     st.markdown("# 🔬 ResearchEngine")
     st.markdown("---")
     
-    # Theme toggle
     theme_label = "☀️ Light Mode" if st.session_state.theme == "dark" else "🌙 Dark Mode"
     if st.button(theme_label, use_container_width=True):
         st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
@@ -1029,11 +1131,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 📦 Import/Export")
-    # Initialize the flag at the top with other session state defaults
-if "import_processed" not in st.session_state:
-    st.session_state.import_processed = False
 
-# Then replace the import block with:
 uploaded_project_file = st.file_uploader(
     "📥 Import Project",
     type=["json"],
@@ -1050,7 +1148,6 @@ if uploaded_project_file is not None and not st.session_state.import_processed:
     except Exception as e:
         st.error(f"Import failed: {str(e)}")
 
-# Reset the flag when no file is uploaded
 if uploaded_project_file is None:
     st.session_state.import_processed = False
     
@@ -1065,6 +1162,97 @@ if uploaded_project_file is None:
             mime="application/json",
             use_container_width=True
         )
+
+
+# ── Quick Actions config ─────────────────────────────────────────────────────
+ACTIONS = [
+    {
+        "label": "📅 Roadmap",
+        "key": "roadmap",
+        "description": "Generates a week-by-week research plan with milestones, suggested methodologies, datasets, prerequisites, risks, and expected deliverables — tailored to your timeline.",
+    },
+    {
+        "label": "🔍 Research Gap",
+        "key": "gap",
+        "description": "Identifies unexplored areas in existing literature, flags methodology drawbacks, missing datasets, weaknesses in prior work, and surfaces open challenges for your topic.",
+    },
+    {
+        "label": "📚 Learning Path",
+        "key": "learning",
+        "description": "Builds a guided study skeleton covering core concepts, curated resources (arXiv, HuggingFace, Kaggle, docs), and practical suggestions to ramp up on your research area.",
+    },
+    {
+        "label": "🧠 Methodology",
+        "key": "methodology",
+        "description": "Surveys current solutions, sparks novelty ideas, recommends a tech stack, and proposes a concrete end-to-end workflow for your project.",
+    },
+    {
+        "label": "📄 Paper Intel",
+        "key": "paper",
+        "description": "Breaks down uploaded research papers: objective, methodology, datasets used, key results, findings, limitations, future work, and concept explanations.",
+    },
+    {
+        "label": "🌐 Discovery",
+        "key": "discovery",
+        "description": "Surfaces recommended papers, datasets, emerging trends, key authors, conferences to follow, and useful repositories — giving you a panoramic view of the field.",
+    },
+    {
+        "label": "🎓 Mentor",
+        "key": "mentor",
+        "description": "Acts as your thesis supervisor: evaluates your current direction, highlights strengths and weaknesses, suggests next steps, and anticipates reviewer questions.",
+    },
+]
+
+
+def render_quick_actions(graph, agent, pid):
+    """Render Quick Actions with hover-info tooltips, 4 per row."""
+    st.markdown("## ⚡ Quick Actions")
+
+    # Inject the action card HTML for each action, and add Streamlit buttons separately
+    # We use a grid of columns matching 4-per-row, place the tooltip HTML above each button col
+    cols_per_row = 4
+    rows = [ACTIONS[i:i+cols_per_row] for i in range(0, len(ACTIONS), cols_per_row)]
+
+    for row in rows:
+        cols = st.columns(cols_per_row)
+        for col_idx, action in enumerate(row):
+            with cols[col_idx]:
+                # Render the tooltip info bubble (pure HTML, sits above the Streamlit button)
+                st.markdown(f"""
+                <div style="position:relative; margin-bottom:2px;">
+                    <span class="action-info-btn">i</span>
+                    <div class="action-tooltip">{action['description']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Render the Streamlit button right after
+                if st.button(action["label"], key=f"feat_{action['key']}", use_container_width=True):
+                    with st.spinner(f"Generating {action['label']}..."):
+                        state = {}
+                        if action["key"] == "roadmap":
+                            state = graph.roadmap_node(state)
+                        elif action["key"] == "gap":
+                            state = graph.researchgap_node(state)
+                        elif action["key"] == "learning":
+                            state = graph.learning_node(state)
+                        elif action["key"] == "methodology":
+                            state = graph.methodology_node(state)
+                        elif action["key"] == "paper":
+                            state = graph.paperintelligence_node(state)
+                        elif action["key"] == "discovery":
+                            state = graph.researchdiscovery_node(state)
+                        elif action["key"] == "mentor":
+                            state = graph.researchmentor_node(state)
+                        answer = state.get("answer", "")
+                    append_message(pid, "user", f"Generate: {action['label']}")
+                    append_message(pid, "assistant", answer)
+                    st.rerun()
+
+        # Fill empty slots in last row so grid stays tidy
+        empty_slots = cols_per_row - len(row)
+        for i in range(empty_slots):
+            with cols[len(row) + i]:
+                st.empty()
 
 
 # New Project Form
@@ -1142,7 +1330,6 @@ elif st.session_state.active_project_id and st.session_state.agent:
     
     st.title(f"🔬 {meta['project_name']}")
     
-    # Project info cards
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("📚 Topic", meta["topic"][:35] + ("..." if len(meta["topic"]) > 35 else ""))
     col2.metric("📅 Timeline", meta["timeline"])
@@ -1151,42 +1338,8 @@ elif st.session_state.active_project_id and st.session_state.agent:
     
     st.markdown("---")
     
-    # Quick Actions
-    st.markdown("## ⚡ Quick Actions")
-    action_cols = st.columns(4)
-    
-    actions = [
-        ("📅 Roadmap", "roadmap"),
-        ("🔍 Research Gap", "gap"),
-        ("📚 Learning Path", "learning"),
-        ("🧠 Methodology", "methodology"),
-        ("📄 Paper Intel", "paper"),
-        ("🌐 Discovery", "discovery"),
-        ("🎓 Mentor", "mentor"),
-    ]
-    
-    for i, (label, key) in enumerate(actions):
-        if action_cols[i % 4].button(label, key=f"feat_{key}", use_container_width=True):
-            with st.spinner(f"Generating {label}..."):
-                state = {}
-                if key == "roadmap":
-                    state = graph.roadmap_node(state)
-                elif key == "gap":
-                    state = graph.researchgap_node(state)
-                elif key == "learning":
-                    state = graph.learning_node(state)
-                elif key == "methodology":
-                    state = graph.methodology_node(state)
-                elif key == "paper":
-                    state = graph.paperintelligence_node(state)
-                elif key == "discovery":
-                    state = graph.researchdiscovery_node(state)
-                elif key == "mentor":
-                    state = graph.researchmentor_node(state)
-                answer = state.get("answer", "")
-            append_message(pid, "user", f"Generate: {label}")
-            append_message(pid, "assistant", answer)
-            st.rerun()
+    # Quick Actions with tooltips
+    render_quick_actions(graph, agent, pid)
     
     st.markdown("---")
     
