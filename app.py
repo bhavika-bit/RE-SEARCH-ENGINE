@@ -1362,21 +1362,25 @@ elif st.session_state.active_project_id and st.session_state.agent:
     st.markdown("---")
     
     # Quick Actions
-    st.markdown("## ⚡ Quick Actions")
-    action_cols = st.columns(4)
-    
-    actions = [
-        ("📅 Roadmap", "roadmap"),
-        ("🔍 Research Gap", "gap"),
-        ("📚 Learning Path", "learning"),
-        ("🧠 Methodology", "methodology"),
-        ("📄 Paper Intel", "paper"),
-        ("🌐 Discovery", "discovery"),
-        ("🎓 Mentor", "mentor"),
-    ]
-    
-    for i, (label, key) in enumerate(actions):
-        if action_cols[i % 4].button(label, key=f"feat_{key}", use_container_width=True):
+# Replace your existing action buttons section with:
+
+st.markdown("## ⚡ Quick Actions")
+action_cols = st.columns(4)
+
+actions = [
+    ("📅 Roadmap", "roadmap", "Generate a week-by-week project execution roadmap with milestones, dependencies, and timeline allocation"),
+    ("🔍 Research Gap", "gap", "Identify underexplored areas, limitations in current research, and novelty opportunities"),
+    ("📚 Learning Path", "learning", "Create a personalized learning roadmap with prerequisites, weekly plan, and exercises"),
+    ("🧠 Methodology", "methodology", "Design complete project architecture with implementation plan and risk analysis"),
+    ("📄 Paper Intel", "paper", "Analyze research papers, compare methodologies, and identify influential works"),
+    ("🌐 Discovery", "discovery", "Explore research landscape, emerging trends, datasets, and publication venues"),
+    ("🎓 Mentor", "mentor", "Get strict thesis supervisor review with assessment, concerns, and success probability"),
+]
+
+for i, (label, key, tooltip_text) in enumerate(actions):
+    col = action_cols[i % 4]
+    with col:
+        if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip_text):
             with st.spinner(f"Generating {label}..."):
                 state = {}
                 if key == "roadmap":
