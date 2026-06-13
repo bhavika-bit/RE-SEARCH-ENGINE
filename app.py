@@ -176,73 +176,157 @@ class ResearchAnalyst:
     def roadmap_generation(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are a research project manager.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
 Timeline: {self.timeline}
-Relevant Research Context: {context}
 
-Generate:
-1. Week-wise roadmap
-2. Suggested methodologies
-3. Datasets
-4. Learning resources
-5. Project pre-requisites
-6. Milestones
-7. Risks and challenges
-8. Expected final deliverables
-9. Feasibility of project in the timeline
+Retrieved Research Context:
+{context}
 
-Be detailed and practical.
+Generate a project execution roadmap.
+
+## Milestones
+
+Week-by-week deliverables.
+
+## Dependencies
+
+What must be completed before each milestone?
+
+## Deliverables
+
+Documents
+Code
+Experiments
+Presentation
+
+## Time Allocation
+
+Percentage effort for:
+- Literature review
+- Data preparation
+- Modeling
+- Evaluation
+- Documentation
+
+## Risk Timeline
+
+Predict likely bottlenecks.
+
+## Final Submission Checklist
+
+Everything needed before project completion.
 """
         return self.llm.invoke(prompt).content
 
     def researchgap(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are a research reviewer.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
+
+Perform a gap analysis.
 
 Generate:
-1. Research gaps
-2. Methodology drawbacks
-3. Missing datasets
-4. Learning resources
-5. Weaknesses in existing work
-6. Risks and challenges
-7. Literature review
 
-Be detailed and practical.
+## 1. Common Themes
+
+What are most papers trying to solve?
+
+## 2. Repeated Methodologies
+
+What techniques appear repeatedly?
+
+## 3. Current Limitations
+
+Identify:
+- Dataset limitations
+- Model limitations
+- Evaluation limitations
+- Deployment limitations
+
+## 4. Missing Research Areas
+
+Identify:
+- Areas with little attention
+- Missing comparisons
+- Missing datasets
+- Missing benchmarks
+
+## 5. Novelty Opportunities
+
+Generate 10 research ideas.
+
+For each:
+- Why it is novel
+- Difficulty (1-10)
+- Publication potential
+
+## 6. Best Research Direction
+
+Select the single most promising direction.
+
+Defend your reasoning.
 """
         return self.llm.invoke(prompt).content
 
     def learning(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are an academic mentor.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
+
+Build a personalized learning roadmap.
 
 Generate:
-1. Core concepts
-2. Guided learning skeleton
-3. Learning sources
-4. Applications of the concept
-5. Suggestions to study
-6. Generate learning resources.
 
-Prefer:
-- Official documentation
-- Official GitHub repositories
-- ArXiv papers
-- Hugging Face model pages
-- Kaggle datasets
+## Prerequisites
 
-Only provide links if reasonably confident they exist.
-Be detailed and practical.
+What must be known first?
+
+## Knowledge Graph
+
+Create:
+
+Foundation
+→ Intermediate
+→ Advanced
+→ Research
+
+## Weekly Learning Plan
+
+Week 1:
+Week 2:
+...
+
+## Practical Exercises
+
+For each stage:
+- Project
+- Coding exercise
+- Paper reading
+
+## Common Mistakes
+
+List beginner traps.
+
+## Readiness Checkpoints
+
+How can the student verify mastery?
+
+Prioritize understanding over memorization.
 """
         return self.llm.invoke(prompt).content
 
@@ -322,132 +406,258 @@ Make flashcards educational and comprehensive.
     def methodology(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are a research architect.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
 Timeline: {self.timeline}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
+
+Design a complete project methodology.
 
 Generate:
-1. Current research solutions
-2. Novelty idea generator
-3. Tech stack
-4. Proposed solution
-5. Proposed workflow
 
-Be detailed and practical.
+## 1. Recommended Architecture
+
+Explain:
+- Inputs
+- Processing stages
+- Models
+- Outputs
+
+## 2. Alternative Architectures
+
+Generate:
+- Conservative approach
+- Balanced approach
+- Novel approach
+
+Compare:
+- Difficulty
+- Innovation
+- Expected outcome
+
+## 3. Implementation Plan
+
+Phase-wise:
+
+Phase 1:
+Phase 2:
+Phase 3:
+...
+
+## 4. Technical Stack
+
+Specify:
+- Libraries
+- Frameworks
+- Hardware requirements
+
+## 5. Risk Analysis
+
+For each risk:
+- Probability
+- Impact
+- Mitigation
+
+## 6. Publication Potential
+
+Rate:
+- Novelty
+- Feasibility
+- Publishability
+
+Be brutally realistic.
 """
         return self.llm.invoke(prompt).content
 
     def paperintelligence(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are a research analyst.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
+
+Build a paper intelligence report.
 
 Generate:
-1. Research objective
-2. Paper summary
-3. Methodology used
-4. Datasets used
-5. Results obtained
-6. Key findings
-7. Limitations
-8. Future work
-9. Important concepts explained
 
-Be detailed and practical.
+## Paper Comparison Matrix
+
+For each paper:
+
+| Paper | Dataset | Model | Results | Strength | Weakness |
+
+## Methodology Trends
+
+Identify:
+- Most common architectures
+- Most common datasets
+- Most common evaluation metrics
+
+## Contradictions
+
+Where do papers disagree?
+
+## Most Influential Papers
+
+Rank top 5.
+
+Explain why.
+
+## Reading Priority
+
+Create:
+
+Beginner Papers
+Intermediate Papers
+Advanced Papers
+
+## Research Takeaways
+
+Summarize lessons a researcher should learn.
 """
         return self.llm.invoke(prompt).content
 
     def researchdiscovery(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor.
+You are a senior research scout.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
+
+Your task is NOT to summarize.
+
+Build a research landscape report.
 
 Generate:
-1. Recommended research papers
-2. Recommended datasets
-3. Emerging trends in this field
-4. Current state of research
-5. Important authors and researchers
-6. Conferences and journals to follow
-7. Useful resources and repositories
-8. Future directions in the field
-9. Generate learning resources.
 
-Prefer:
-- Official documentation
-- Official GitHub repositories
-- ArXiv papers
-- Hugging Face model pages
-- Kaggle datasets
+## 1. Field Overview
+- What subdomain does this belong to?
+- What problems are researchers trying to solve?
 
-Only provide links if reasonably confident they exist.
-Be detailed and practical.
+## 2. Important Research Directions
+List 5 major research directions currently being explored.
+
+For each:
+- Goal
+- Why it matters
+- Recent popularity
+
+## 3. Research Opportunities
+Identify underexplored opportunities based on the retrieved papers.
+
+## 4. Dataset Landscape
+Create a table:
+
+| Dataset | Purpose | Size | Common Usage |
+
+## 5. Research Ecosystem
+List:
+- Major conferences
+- Journals
+- Research groups
+- GitHub repositories
+
+## 6. Emerging Trends
+Predict where this field may move within 2-3 years.
+
+Output should resemble a research scouting report.
 """
         return self.llm.invoke(prompt).content
 
     def researchmentor(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor and thesis supervisor.
+You are a strict thesis supervisor.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+Timeline: {self.timeline}
+
+Retrieved Research Context:
+{context}
+
+Conduct a project review.
 
 Generate:
-1. Feedback on current direction
-2. Progress evaluation
-3. Strengths of the project
-4. Weaknesses of the project
-5. Suggested next steps
-6. Potential challenges
-7. Questions a reviewer may ask
-8. Suggestions for improvement
-9. Advice for successful completion
-10. Generate learning resources.
 
-Prefer:
-- Official documentation
-- Official GitHub repositories
-- ArXiv papers
-- Hugging Face model pages
-- Kaggle datasets
+## Overall Assessment
 
-Only provide links if reasonably confident they exist.
-Be detailed and practical.
+Rate:
+- Clarity
+- Novelty
+- Feasibility
+- Impact
+
+## Strengths
+
+## Weaknesses
+
+## Reviewer Concerns
+
+List questions a reviewer may ask.
+
+## Missing Components
+
+What is not yet addressed?
+
+## Next 5 Actions
+
+Most important tasks right now.
+
+## Success Probability
+
+Estimate likelihood of completion within timeline.
+
+Be constructive but brutally honest.
 """
         return self.llm.invoke(prompt).content
 
     def projectsummary(self):
         context = self._get_context()
         prompt = f"""
-You are an expert research mentor and thesis supervisor.
+You are preparing a project brief for a professor.
+
 Topic: {self.topic}
 Problem Statement: {self.problem_statement}
-Relevant Research Context: {context}
+
+Retrieved Research Context:
+{context}
 
 Generate:
-1. Project summary
-2. Project scope
-3. Idea feasibility
-4. Generate learning resources.
 
-Prefer:
-- Official documentation
-- Official GitHub repositories
-- ArXiv papers
-- Hugging Face model pages
-- Kaggle datasets
+## Executive Summary
 
-Only provide links if reasonably confident they exist.
-Be detailed and practical.
+## Problem Statement
+
+## Why This Matters
+
+## Current State of Research
+
+## Proposed Solution
+
+## Expected Outcomes
+
+## Technical Requirements
+
+## Innovation Score (1-10)
+
+## Feasibility Score (1-10)
+
+## Elevator Pitch (100 words)
+
+The output should be presentation-ready.
 """
         return self.llm.invoke(prompt).content
 
