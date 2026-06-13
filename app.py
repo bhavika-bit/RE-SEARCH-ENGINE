@@ -1362,74 +1362,47 @@ elif st.session_state.active_project_id and st.session_state.agent:
     st.markdown("---")
     
     # Quick Actions
-
-st.markdown("## ⚡ Quick Actions")
-
-actions = [
-    ("📅 Roadmap", "roadmap", "Generate a week-by-week project execution roadmap with milestones, dependencies, and timeline allocation"),
-    ("🔍 Research Gap", "gap", "Identify underexplored areas, limitations in current research, and novelty opportunities"),
-    ("📚 Learning Path", "learning", "Create a personalized learning roadmap with prerequisites, weekly plan, and exercises"),
-    ("🧠 Methodology", "methodology", "Design complete project architecture with implementation plan and risk analysis"),
-    ("📄 Paper Intel", "paper", "Analyze research papers, compare methodologies, and identify influential works"),
-    ("🌐 Discovery", "discovery", "Explore research landscape, emerging trends, datasets, and publication venues"),
-    ("🎓 Mentor", "mentor", "Get strict thesis supervisor review with assessment, concerns, and success probability"),
-]
-
-# Row 1: First 4 actions
-cols1 = st.columns(4)
-for i in range(4):
-    if i < len(actions):
-        label, key, tooltip = actions[i]
-        with cols1[i]:
-            if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
-                with st.spinner(f"Generating {label}..."):
-                    state = {}
-                    if key == "roadmap":
-                        state = graph.roadmap_node(state)
-                    elif key == "gap":
-                        state = graph.researchgap_node(state)
-                    elif key == "learning":
-                        state = graph.learning_node(state)
-                    elif key == "methodology":
-                        state = graph.methodology_node(state)
-                    elif key == "paper":
-                        state = graph.paperintelligence_node(state)
-                    elif key == "discovery":
-                        state = graph.researchdiscovery_node(state)
-                    elif key == "mentor":
-                        state = graph.researchmentor_node(state)
-                    answer = state.get("answer", "")
-                    append_message(pid, "user", f"Generate: {label}")
-                    append_message(pid, "assistant", answer)
-                    st.rerun()
-
-# Row 2: Remaining 3 actions
-cols2 = st.columns(4)  
-for i in range(4, len(actions)):
-    idx = i - 4
-    label, key, tooltip = actions[i]
-    with cols2[idx]:
-        if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
-            with st.spinner(f"Generating {label}..."):
-                state = {}
-                if key == "roadmap":
-                    state = graph.roadmap_node(state)
-                elif key == "gap":
-                    state = graph.researchgap_node(state)
-                elif key == "learning":
-                    state = graph.learning_node(state)
-                elif key == "methodology":
-                    state = graph.methodology_node(state)
-                elif key == "paper":
-                    state = graph.paperintelligence_node(state)
-                elif key == "discovery":
-                    state = graph.researchdiscovery_node(state)
-                elif key == "mentor":
-                    state = graph.researchmentor_node(state)
-                answer = state.get("answer", "")
-                append_message(pid, "user", f"Generate: {label}")
-                append_message(pid, "assistant", answer)
-                st.rerun()
+    st.markdown("## ⚡ Quick Actions")
+    
+    actions = [
+        ("📅 Roadmap", "roadmap", "Generate a week-by-week project execution roadmap with milestones, dependencies, and timeline allocation"),
+        ("🔍 Research Gap", "gap", "Identify underexplored areas, limitations in current research, and novelty opportunities"),
+        ("📚 Learning Path", "learning", "Create a personalized learning roadmap with prerequisites, weekly plan, and exercises"),
+        ("🧠 Methodology", "methodology", "Design complete project architecture with implementation plan and risk analysis"),
+        ("📄 Paper Intel", "paper", "Analyze research papers, compare methodologies, and identify influential works"),
+        ("🌐 Discovery", "discovery", "Explore research landscape, emerging trends, datasets, and publication venues"),
+        ("🎓 Mentor", "mentor", "Get strict thesis supervisor review with assessment, concerns, and success probability"),
+    ]
+    
+    # Display buttons in rows of 4
+    for row_idx in range(0, len(actions), 4):
+        cols = st.columns(4)
+        for col_idx in range(4):
+            action_idx = row_idx + col_idx
+            if action_idx < len(actions):
+                label, key, tooltip = actions[action_idx]
+                with cols[col_idx]:
+                    if st.button(label, key=f"feat_{key}", use_container_width=True, help=tooltip):
+                        with st.spinner(f"Generating {label}..."):
+                            state = {}
+                            if key == "roadmap":
+                                state = graph.roadmap_node(state)
+                            elif key == "gap":
+                                state = graph.researchgap_node(state)
+                            elif key == "learning":
+                                state = graph.learning_node(state)
+                            elif key == "methodology":
+                                state = graph.methodology_node(state)
+                            elif key == "paper":
+                                state = graph.paperintelligence_node(state)
+                            elif key == "discovery":
+                                state = graph.researchdiscovery_node(state)
+                            elif key == "mentor":
+                                state = graph.researchmentor_node(state)
+                            answer = state.get("answer", "")
+                            append_message(pid, "user", f"Generate: {label}")
+                            append_message(pid, "assistant", answer)
+                            st.rerun()
     
     st.markdown("---")
     
@@ -1440,7 +1413,8 @@ for i in range(4, len(actions)):
     
     with quiz_col:
         st.markdown("### 📝 Take a Quiz")
-        if st.button("🎯 Generate New Quiz", use_container_width=True, type="primary"):
+        # Use a unique key that includes project_id to avoid duplication
+        if st.button("🎯 Generate New Quiz", key=f"gen_quiz_{pid}", use_container_width=True, type="primary"):
             with st.spinner("Generating quiz questions..."):
                 quiz_json = agent.quizgenerator_json()
                 st.session_state.quiz_data = quiz_json
@@ -1459,7 +1433,8 @@ for i in range(4, len(actions)):
     
     with flash_col:
         st.markdown("### 🃏 Practice with Flashcards")
-        if st.button("🔄 Generate New Flashcards", use_container_width=True, type="primary"):
+        # Use a unique key that includes project_id to avoid duplication
+        if st.button("🔄 Generate New Flashcards", key=f"gen_flash_{pid}", use_container_width=True, type="primary"):
             with st.spinner("Generating flashcards..."):
                 flashcards_json = agent.flashcards_json()
                 st.session_state.flashcards = flashcards_json
