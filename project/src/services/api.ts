@@ -110,6 +110,20 @@ export async function loadProject(projectId: string): Promise<Project | null> {
   }
 }
 
+// The backend stores chat history per project. Call this after loadProject()
+// to restore the conversation — loadProject() only returns project metadata.
+export async function getChatHistory(projectId: string): Promise<Message[]> {
+  const data = await apiFetch(`/chat/${projectId}/history`);
+  // Backend stores history as {role, content} pairs without id/timestamp,
+  // so we generate those here to match the Message shape the UI expects.
+  return (data as { role: 'user' | 'assistant'; content: string }[]).map((m) => ({
+    id: generateId(),
+    role: m.role,
+    content: m.content,
+    timestamp: new Date().toISOString(),
+  }));
+}
+
 export async function uploadDocuments(
   projectId: string,
   files: File[]
