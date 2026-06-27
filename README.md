@@ -50,6 +50,41 @@ The frontend calls the backend's REST endpoints directly from the browser.
 | Backend API | FastAPI, Uvicorn |
 | AI / LLM | Google Gemini (`gemini-2.5-flash`) via `langchain-google-genai` |
 | Embeddings | HuggingFace `sentence-transformers/all-MiniLM-L6-v2` |
+
+## Running locally
+
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+GOOGLE_API_KEY=your_key_here uvicorn main:app --reload
+```
+Visit `http://localhost:8000/docs` for interactive API docs.
+
+### Frontend
+```bash
+cd project
+npm install
+npm run dev
+```
+Update `API_BASE_URL` in `project/src/services/api.ts` to `http://localhost:8000` to point the frontend at your local backend instead of the deployed one.
+
+## API Endpoints
+
+- `POST /projects` — create a project
+- `GET /projects` — list saved projects
+- `POST /projects/{id}/load` — load an existing project
+- `POST /projects/{id}/documents` — upload and index documents
+- `GET /projects/{id}/export` / `POST /projects/import` — project portability
+- `POST /chat` — conversational research mentor
+- `POST /tools/{tool_name}` — run a research-analysis tool (roadmap, researchgap, learning, methodology, paperintelligence, researchdiscovery, researchmentor, projectsummary)
+- `POST /quiz` / `POST /flashcards` — generate self-test material
+
+## Author
+
+**Bhavika Jata**
+B.Tech, Artificial Intelligence & Data Science
+K. J. Somaiya School of Engineering
 | Vector DB | FAISS |
 | Document parsing | PyMuPDF, Docx2txt, CSVLoader |
 | Frontend hosting | Netlify |
