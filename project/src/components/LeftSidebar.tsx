@@ -18,7 +18,15 @@ import {
 } from 'lucide-react';
 import { useProject } from '../contexts/ProjectContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { createProject, loadAllProjects, importProject, uploadDocuments, indexDocuments } from '../services/api';
+import {
+  createProject,
+  loadAllProjects,
+  loadProject,
+  getChatHistory,
+  importProject,
+  uploadDocuments,
+  indexDocuments,
+} from '../services/api';
 
 export default function LeftSidebar() {
   const {
@@ -26,6 +34,7 @@ export default function LeftSidebar() {
     setActiveProject,
     projects,
     setProjects,
+    setChatHistory,
     documentStatus,
     setDocumentStatus,
     uploadedFiles,
@@ -42,6 +51,7 @@ export default function LeftSidebar() {
   const [isImporting, setIsImporting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
+  const [isLoadingProject, setIsLoadingProject] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +63,7 @@ export default function LeftSidebar() {
     try {
       const project = await createProject(topic, problemStatement, timeline);
       setActiveProject(project);
+      setChatHistory([]);
       setTopic('');
       setProblemStatement('');
       setTimeline('');
@@ -65,10 +76,21 @@ export default function LeftSidebar() {
 
   const handleLoadProject = async () => {
     if (!selectProjectId) return;
-    const project = projects.find(p => p.project_id === selectProjectId);
-    if (project) {
-      setActiveProject(project);
-      setSelectProjectId('');
+    setIsLoadingProject(true);
+    try {
+      // Calls the backend to actually re-initialize the RAG/agent for this
+      // project (not just pulling cached metadata from the local projects list).
+      const project = await loadProject(selectProjectId);
+      if (project) {
+        setActiveProject(project);
+        const history = await getChatHistory(selectProjectId);
+        setChatHistory(history);
+        setSelectProjectId('');
+      }
+    } catch (err) {
+      console.error('Failed to load project:', err);
+    } finally {
+      setIsLoadingProject(false);
     }
   };
 
@@ -81,6 +103,8 @@ export default function LeftSidebar() {
       const text = await file.text();
       const project = await importProject(text);
       setActiveProject(project);
+      const history = await getChatHistory(project.project_id);
+      setChatHistory(history);
       const allProjects = await loadAllProjects();
       setProjects(allProjects);
     } catch (err) {
@@ -104,12 +128,14 @@ export default function LeftSidebar() {
       if (files.length > 0) {
         setUploadedFiles(files);
         setIsUploading(true);
-        await uploadDocuments(files);
+        if (activeProject) {
+          await uploadDocuments(activeProject.project_id, files);
+        }
         setIsUploading(false);
         setDocumentStatus(`${files.length} file(s) ready to index`);
       }
     },
-    [setUploadedFiles, setDocumentStatus]
+    [setUploadedFiles, setDocumentStatus, activeProject]
   );
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +143,9 @@ export default function LeftSidebar() {
     if (files.length > 0) {
       setUploadedFiles(files);
       setIsUploading(true);
-      await uploadDocuments(files);
+      if (activeProject) {
+        await uploadDocuments(activeProject.project_id, files);
+      }
       setIsUploading(false);
       setDocumentStatus(`${files.length} file(s) ready to index`);
     }
@@ -239,8 +267,10 @@ export default function LeftSidebar() {
         {selectProjectId && (
           <button
             onClick={handleLoadProject}
-            className="w-full mt-2 py-2 px-3 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 text-sm font-medium rounded-lg transition-colors"
+            disabled={isLoadingProject}
+            className="w-full mt-2 py-2 px-3 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 disabled:opacity-50 text-stone-700 dark:text-stone-200 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
           >
+            {isLoadingProject ? <Loader2 size={14} className="animate-spin" /> : null}
             Load
           </button>
         )}
