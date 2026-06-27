@@ -1,170 +1,134 @@
-# ResearchEngine 🚀
-[https://helpful-klepon-6bb92c.netlify.app/]
-ResearchEngine is an AI-powered research assistant that helps students, researchers, and developers analyze research papers, discover research gaps, generate project roadmaps, create learning plans, and receive mentor-style guidance using Retrieval-Augmented Generation (RAG).
+##ResearchEngine 🚀
 
-## Features
+ResearchEngine is an AI-powered research assistant that helps students, researchers, and
+developers analyze research papers, discover research gaps, generate project roadmaps,
+create learning plans, and receive mentor-style guidance using Retrieval-Augmented
+Generation (RAG).
 
-### 📚 Document Processing
-- Upload and analyze:
-  - PDF
-  - DOCX
-  - TXT
-  - CSV
-- Multiple file support
-- Folder ingestion support
-- Automatic chunking and embedding
+Live demo: https://re-searchengine.netlify.app
+Live API: https://bhavikajata-researchengine-api.hf.space/docs
 
-### 🔍 Research Intelligence
-- Project Summary
-- Research Gap Analysis
-- Literature Review Assistance
-- Paper Intelligence
-- Research Discovery
-- Methodology Generation
-- Learning Path Generation
-- Research Roadmap Generation
-- Research Mentor Guidance
+Architecture
 
-### 🧠 AI & RAG
-- Google Gemini Integration
-- HuggingFace Embeddings
-- FAISS Vector Database
-- Semantic Search
-- Context-Aware Research Assistance
+This project is split into two independently deployed services that communicate over a REST API:
 
-### 🎯 Planned Enhancements
-- Persistent Project Sessions
-- Conversational Research Mentor
-- Project Progress Tracking
-- Quiz Evaluation System
-- Long-Term Project Memory
-- Multi-Project Workspace
+┌─────────────────────┐         REST API         ┌──────────────────────────┐
+│   Frontend (React)   │  ──────────────────────▶ │   Backend (FastAPI)      │
+│   Hosted on Netlify  │ ◀──────────────────────  │   Hosted on HF Spaces    │
+└─────────────────────┘                           └──────────────────────────┘
+                                                              │
+                                                              ▼
+                                                   RAG pipeline (LangChain,
+                                                   FAISS, HuggingFace embeddings)
+                                                   + Google Gemini
 
----
 
-## Tech Stack
+/project — React + TypeScript + Vite + Tailwind frontend. Deployed on Netlify,
+builds automatically from this repo.
+/backend — model.py (RAG pipeline, research-analysis logic) wrapped in a FastAPI
+app (main.py). Deployed as a Docker Space on Hugging Face Spaces.
 
-### Languages
-- Python
 
-### AI & LLM
-- Google Gemini
-- LangChain
+##Features
 
-### Embeddings
-- Sentence Transformers
-- HuggingFace Embeddings
-- all-MiniLM-L6-v2
+📚 Document Processing
 
-### Vector Database
-- FAISS
 
-### Frontend
-- Streamlit
+Upload and analyze PDF, DOCX, TXT, CSV
+Multiple file support, automatic chunking and embedding
+FAISS vector storage, persisted per project
 
-### Document Processing
-- PyMuPDF
-- Docx2txt
-- CSV Loader
 
----
+🔍 Research Intelligence
 
-## Installation
 
-### Clone Repository
+Project Summary, Research Gap Analysis, Paper Intelligence, Research Discovery
+Methodology Generation, Learning Path Generation, Research Roadmap Generation
+Research Mentor Guidance (structured critique of project direction)
 
-```bash
-git clone https://github.com/yourusername/ResearchEngine.git
 
-cd ResearchEngine
-```
+🧠 AI & RAG
 
-### Create Virtual Environment
 
-```bash
-python -m venv venv
-```
+Google Gemini for generation
+HuggingFace sentence-transformers/all-MiniLM-L6-v2 for embeddings
+FAISS for semantic search over uploaded documents
 
-Windows:
 
-```bash
-venv\Scripts\activate
-```
+🎓 Self-Testing
 
-Linux / Mac:
 
-```bash
-source venv/bin/activate
-```
+AI-generated multiple-choice quizzes (answers hidden until checked)
+AI-generated flashcards
 
-### Install Dependencies
 
-```bash
+💾 Project Continuity
+
+
+Export a project (metadata + chat history) as JSON
+Import a previously exported project to continue where you left off
+
+
+##Tech Stack
+
+LayerTechnologyFrontendReact, TypeScript, Vite, Tailwind CSSBackend APIFastAPI, UvicornAI / LLMGoogle Gemini (gemini-2.5-flash) via langchain-google-genaiEmbeddingsHuggingFace sentence-transformers/all-MiniLM-L6-v2Vector DBFAISSDocument parsingPyMuPDF, Docx2txt, CSVLoaderFrontend hostingNetlifyBackend hostingHugging Face Spaces (Docker SDK)
+
+##Project Structure
+
+RE-SEARCH-ENGINE/
+│
+├── project/              # React frontend (Netlify deploy source)
+│   ├── src/
+│   │   ├── services/
+│   │   │   └── api.ts    # calls the live FastAPI backend
+│   │   └── ...
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── backend/               # FastAPI backend (Hugging Face Spaces deploy source)
+│   ├── main.py            # FastAPI app — wraps model.py in REST endpoints
+│   ├── model.py           # RAG pipeline + research-analysis logic
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+└── README.md
+
+Running locally
+
+##Backend
+
+bashcd backend
 pip install -r requirements.txt
-```
+GOOGLE_API_KEY=your_key_here uvicorn main:app --reload
 
----
+Visit http://localhost:8000/docs for interactive API docs.
 
-## Environment Variables
+Frontend
 
-Create a `.env` file in the project root:
+bashcd project
+npm install
+npm run dev
 
-```env
-GOOGLE_API_KEY=your_google_api_key
-```
+Update API_BASE_URL in project/src/services/api.ts to http://localhost:8000 to point
+the frontend at your local backend instead of the deployed one.
 
----
+API Endpoints
 
-## Run Application
 
-### CLI Version
+POST /projects — create a project
+GET /projects — list saved projects
+POST /projects/{id}/load — load an existing project
+POST /projects/{id}/documents — upload and index documents
+GET /projects/{id}/export / POST /projects/import — project portability
+POST /chat — conversational research mentor
+POST /tools/{tool_name} — run a research-analysis tool (roadmap, researchgap,
+learning, methodology, paperintelligence, researchdiscovery, researchmentor,
+projectsummary)
+POST /quiz / POST /flashcards — generate self-test material
 
-```bash
-python model.py
-```
 
-### Streamlit Version
+##Author
 
-```bash
-streamlit run app.py
-```
-
----
-
-## Project Structure
-
-```text
-ResearchEngine/
-│
-├── app.py
-├── model.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-├── .env
-│
-├── projects/
-│
-└── assets/
-```
-
----
-
-## Use Cases
-
-- Academic Research
-- Literature Review
-- Thesis Planning
-- Research Gap Discovery
-- Learning New Research Domains
-- Research Project Management
-
----
-
-## Author
-
-**Bhavika Jata**
-
-B.Tech Artificial Intelligence & Data Science
-
-KJ Somaiya College of Engineering
+Bhavika Jata
+B.Tech, Artificial Intelligence & Data Science
+K. J. Somaiya School of Engineering
