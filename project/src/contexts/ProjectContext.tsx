@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Project, Message, Quiz, Flashcards, ToolResult } from '../services/api';
-
 interface ProjectContextType {
   activeProject: Project | null;
   projects: Project[];
@@ -13,6 +12,7 @@ interface ProjectContextType {
   setActiveProject: (project: Project | null) => void;
   setProjects: (projects: Project[]) => void;
   addMessage: (message: Message) => void;
+  setChatHistory: (messages: Message[]) => void;
   clearChat: () => void;
   addToolResult: (result: ToolResult) => void;
   setQuiz: (quiz: Quiz | null) => void;
@@ -24,9 +24,7 @@ interface ProjectContextType {
   uploadedFiles: File[];
   setUploadedFiles: (files: File[]) => void;
 }
-
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
-
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -38,19 +36,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);
   const [documentStatus, setDocumentStatus] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-
   const addMessage = (message: Message) => {
     setChatHistory(prev => [...prev, message]);
   };
-
   const clearChat = () => {
     setChatHistory([]);
   };
-
   const addToolResult = (result: ToolResult) => {
     setToolResults(prev => [...prev, result]);
   };
-
   return (
     <ProjectContext.Provider
       value={{
@@ -65,6 +59,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         setActiveProject,
         setProjects,
         addMessage,
+        setChatHistory,
         clearChat,
         addToolResult,
         setQuiz,
@@ -81,7 +76,6 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     </ProjectContext.Provider>
   );
 }
-
 export function useProject() {
   const context = useContext(ProjectContext);
   if (!context) {
